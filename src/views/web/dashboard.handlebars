@@ -1,0 +1,265 @@
+<div>
+  <!-- Header & Actions -->
+  <div class="page-header">
+    <div>
+      <h1 style="font-size: 28px; margin-bottom: 4px;">Resource Management</h1>
+      <p style="color: #94a3b8; font-size: 14px;">
+        Production CRUD operations connected directly to your database with live updates
+      </p>
+    </div>
+    <button class="btn btn-primary" onclick="createItemModal()">
+      <span>➕ New Resource</span>
+    </button>
+  </div>
+
+  <!-- Metrics Cards Banner -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 28px;">
+    <div class="glass-panel" style="padding: 20px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; color: #94a3b8; margin-bottom: 8px;">
+        <span style="font-size: 13px; font-weight: 600;">Total Resources</span>
+        <span style="font-size: 18px;">📁</span>
+      </div>
+      <div style="font-size: 26px; font-weight: 800; color: #f8fafc;">{{stats.total}}</div>
+    </div>
+
+    <div class="glass-panel" style="padding: 20px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; color: #94a3b8; margin-bottom: 8px;">
+        <span style="font-size: 13px; font-weight: 600;">Active Items</span>
+        <span style="font-size: 18px;">✅</span>
+      </div>
+      <div style="font-size: 26px; font-weight: 800; color: #34d399;">{{stats.active}}</div>
+    </div>
+
+    <div class="glass-panel" style="padding: 20px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; color: #94a3b8; margin-bottom: 8px;">
+        <span style="font-size: 13px; font-weight: 600;">Drafts</span>
+        <span style="font-size: 18px;">📝</span>
+      </div>
+      <div style="font-size: 26px; font-weight: 800; color: #fbbf24;">{{stats.draft}}</div>
+    </div>
+
+    <div class="glass-panel" style="padding: 20px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; color: #94a3b8; margin-bottom: 8px;">
+        <span style="font-size: 13px; font-weight: 600;">Archived</span>
+        <span style="font-size: 18px;">📦</span>
+      </div>
+      <div style="font-size: 26px; font-weight: 800; color: #94a3b8;">{{stats.archived}}</div>
+    </div>
+  </div>
+
+  <!-- Filters & Search Form -->
+  <form method="GET" action="/dashboard" class="glass-panel" style="padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+    <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 260px;">
+      <input type="text" name="q" class="form-input" placeholder="Search items by title or description..." value="{{query.q}}">
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+      <select name="status" class="form-select" style="width: 130px;" onchange="this.form.submit()">
+        <option value="">All Statuses</option>
+        <option value="active" {{#if (eq query.status 'active')}}selected{{/if}}>Active</option>
+        <option value="draft" {{#if (eq query.status 'draft')}}selected{{/if}}>Draft</option>
+        <option value="archived" {{#if (eq query.status 'archived')}}selected{{/if}}>Archived</option>
+      </select>
+
+      <select name="category" class="form-select" style="width: 140px;" onchange="this.form.submit()">
+        <option value="">All Categories</option>
+        <option value="general" {{#if (eq query.category 'general')}}selected{{/if}}>General</option>
+        <option value="infrastructure" {{#if (eq query.category 'infrastructure')}}selected{{/if}}>Infrastructure</option>
+        <option value="security" {{#if (eq query.category 'security')}}selected{{/if}}>Security</option>
+        <option value="frontend" {{#if (eq query.category 'frontend')}}selected{{/if}}>Frontend</option>
+        <option value="database" {{#if (eq query.category 'database')}}selected{{/if}}>Database</option>
+      </select>
+
+      <select name="sort" class="form-select" style="width: 150px;" onchange="this.form.submit()">
+        <option value="createdAt-DESC" {{#if (eq query.sort 'createdAt-DESC')}}selected{{/if}}>Newest First</option>
+        <option value="createdAt-ASC" {{#if (eq query.sort 'createdAt-ASC')}}selected{{/if}}>Oldest First</option>
+        <option value="title-ASC" {{#if (eq query.sort 'title-ASC')}}selected{{/if}}>Title (A-Z)</option>
+        <option value="title-DESC" {{#if (eq query.sort 'title-DESC')}}selected{{/if}}>Title (Z-A)</option>
+      </select>
+
+      <button type="submit" class="btn btn-secondary btn-sm">Filter</button>
+      {{#if hasActiveFilters}}
+        <a href="/dashboard" class="btn btn-secondary btn-sm" title="Clear all filters">Clear</a>
+      {{/if}}
+    </div>
+  </form>
+
+  <!-- Items Grid -->
+  {{#if items.length}}
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px;">
+      {{#each items}}
+        <div class="glass-panel glass-panel-hover" style="padding: 22px; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+              <span style="font-size: 12px; color: #818cf8; font-weight: 600; text-transform: capitalize;">
+                {{this.category}}
+              </span>
+              <div style="display: flex; gap: 6px;">
+                {{#if (eq this.priority 'high')}}
+                  <span class="badge badge-danger">High</span>
+                {{else if (eq this.priority 'medium')}}
+                  <span class="badge badge-warning">Medium</span>
+                {{else}}
+                  <span class="badge badge-info">Low</span>
+                {{/if}}
+
+                {{#if (eq this.status 'active')}}
+                  <span class="badge badge-active">Active</span>
+                {{else if (eq this.status 'draft')}}
+                  <span class="badge badge-draft">Draft</span>
+                {{else}}
+                  <span class="badge badge-archived">Archived</span>
+                {{/if}}
+              </div>
+            </div>
+
+            <h3 style="font-size: 17px; color: #f8fafc; margin-bottom: 8px; line-height: 1.3;">
+              {{this.title}}
+            </h3>
+
+            <p style="color: #94a3b8; font-size: 13px; line-height: 1.5; margin-bottom: 16px;">
+              {{#if this.description}}{{this.description}}{{else}}No detailed description provided.{{/if}}
+            </p>
+
+            {{#if this.tags.length}}
+              <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px;">
+                {{#each this.tags}}
+                  <span style="font-size: 11px; color: #cbd5e1; background: rgba(255, 255, 255, 0.06); padding: 3px 8px; border-radius: 6px;">
+                    🏷️ {{this}}
+                  </span>
+                {{/each}}
+              </div>
+            {{/if}}
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.06); font-size: 12px; color: #64748b;">
+            <span>🕒 {{formatDate this.createdAt}}</span>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary btn-sm" onclick='editItemModal({{{json this}}})'>
+                ✏️ Edit
+              </button>
+              <button class="btn btn-danger btn-sm" onclick='deleteItemModal("{{this.id}}", "{{this.title}}")'>
+                🗑️
+              </button>
+            </div>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+
+    <!-- Pagination -->
+    {{#if (gt pagination.totalPages 1)}}
+      <div style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 32px;">
+        {{#if (gt pagination.currentPage 1)}}
+          <a href="/dashboard?page={{subtract pagination.currentPage 1}}&q={{query.q}}&status={{query.status}}&category={{query.category}}&sort={{query.sort}}" class="btn btn-secondary btn-sm">&larr; Previous</a>
+        {{/if}}
+
+        <span style="color: #94a3b8; font-size: 13px;">
+          Page <strong style="color: #f8fafc;">{{pagination.currentPage}}</strong> of {{pagination.totalPages}} ({{pagination.totalItems}} total)
+        </span>
+
+        {{#if (lt pagination.currentPage pagination.totalPages)}}
+          <a href="/dashboard?page={{add pagination.currentPage 1}}&q={{query.q}}&status={{query.status}}&category={{query.category}}&sort={{query.sort}}" class="btn btn-secondary btn-sm">Next &rarr;</a>
+        {{/if}}
+      </div>
+    {{/if}}
+  {{else}}
+    <div class="glass-panel" style="text-align: center; padding: 64px 20px;">
+      <div style="font-size: 48px; margin-bottom: 16px;">📁</div>
+      <h3 style="font-size: 19px; margin-bottom: 6px; color: #f8fafc;">No Resource Items Found</h3>
+      <p style="color: #94a3b8; font-size: 14px; max-width: 420px; margin: 0 auto 24px auto;">
+        {{#if hasActiveFilters}}
+          No items match your active filters. Try adjusting search criteria or clearing filters.
+        {{else}}
+          Your workspace has no resources yet. Create your first item to begin tracking project assets.
+        {{/if}}
+      </p>
+      {{#if hasActiveFilters}}
+        <a href="/dashboard" class="btn btn-secondary">Clear Active Filters</a>
+      {{else}}
+        <button class="btn btn-primary" onclick="createItemModal()">➕ Create Your First Resource</button>
+      {{/if}}
+    </div>
+  {{/if}}
+</div>
+
+<!-- Create / Edit Item Modal -->
+<div id="item-modal" class="modal-backdrop">
+  <div class="glass-panel modal-dialog">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2 id="item-modal-title" style="font-size: 19px;">New Resource Item</h2>
+      <button type="button" onclick="closeModal('item-modal')" style="background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer;">✕</button>
+    </div>
+
+    <form id="item-form" method="POST" action="/items/create">
+      <div class="form-group">
+        <label class="form-label" for="item-title">Title</label>
+        <input id="item-title" type="text" name="title" class="form-input" placeholder="e.g. Email Delivery Worker" required>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label class="form-label" for="item-category">Category</label>
+          <select id="item-category" name="category" class="form-select">
+            <option value="general">General</option>
+            <option value="infrastructure">Infrastructure</option>
+            <option value="security">Security</option>
+            <option value="frontend">Frontend</option>
+            <option value="database">Database</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="item-priority">Priority</label>
+          <select id="item-priority" name="priority" class="form-select">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="item-status">Status</label>
+          <select id="item-status" name="status" class="form-select">
+            <option value="active" selected>Active</option>
+            <option value="draft">Draft</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="item-description">Description</label>
+        <textarea id="item-description" name="description" class="form-textarea" placeholder="Detailed description of this resource..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="item-tags">Tags (comma-separated)</label>
+        <input id="item-tags" type="text" name="tags" class="form-input" placeholder="smtp, nodemailer, worker">
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('item-modal')" style="flex: 1;">Cancel</button>
+        <button type="submit" class="btn btn-primary" style="flex: 1;">Save Resource</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Item Modal -->
+<div id="delete-modal" class="modal-backdrop">
+  <div class="glass-panel modal-dialog" style="text-align: center; max-width: 420px;">
+    <div style="font-size: 36px; margin-bottom: 12px;">⚠️</div>
+    <h3 style="font-size: 19px; margin-bottom: 8px;">Delete Resource Item</h3>
+    <p style="color: #94a3b8; font-size: 13px; margin-bottom: 24px;">
+      Are you sure you want to permanently delete <strong id="delete-item-title" style="color: #f8fafc;"></strong>? This action cannot be reversed.
+    </p>
+
+    <form id="delete-item-form" method="POST" action="">
+      <div style="display: flex; gap: 12px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('delete-modal')" style="flex: 1;">Cancel</button>
+        <button type="submit" class="btn btn-danger" style="flex: 1;">Delete Item</button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,18 +1,41 @@
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const crypto = require('crypto');
+const cookieParser = require('cookie-parser');
+const { engine } = require('express-handlebars');
 
 const { initDatabase, getActiveDialect } = require('./src/config/database');
 const { closeDatabase } = require('./src/config/database');
 const { verifyEmailTransporter, getSmtpStatus } = require('./src/config/email');
 const apiRoutes = require('./src/routes');
+const webRoutes = require('./src/routes/web.routes');
 const { notFoundHandler, errorHandler } = require('./src/middlewares/error.middleware');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ─── Handlebars Web View Engine Setup ───
+app.engine('handlebars', engine({
+  defaultLayout: 'web',
+  layoutsDir: path.join(__dirname, 'src/views/layouts'),
+  helpers: {
+    eq: (a, b) => a === b,
+    gt: (a, b) => a > b,
+    lt: (a, b) => a < b,
+    add: (a, b) => Number(a) + Number(b),
+    subtract: (a, b) => Number(a) - Number(b),
+    json: (obj) => JSON.stringify(obj),
+    formatDate: (d) => d ? new Date(d).toLocaleDateString() : '',
+    userInitial: (name) => name ? name[0].toUpperCase() : 'U',
+    currentYear: () => new Date().getFullYear()
+  }
+}));
+app.set('view engine', 'handlebars');
+app.set('views', path.join(__dirname, 'src/views/web'));
 
 // ─── Request ID middleware ───
 app.use((req, res, next) => {
@@ -37,83 +60,21 @@ app.use((req, res, next) => {
 
 // Security & utility middlewares
 app.use(helmet({
-  contentSecurityPolicy: false // Allows email preview rendering in browser
+  contentSecurityPolicy: false // Allows email preview rendering in browser iframe
 }));
 app.use(cors());
 app.use(morgan(':method :url :status :response-time ms - :req[x-request-id]'));
+app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Friendly API root / welcome dashboard
-app.get('/', (req, res) => {
-  const smtp = getSmtpStatus();
-  res.send(`
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="utf-8">
-      <title>SMTP Backend Suite & API</title>
-      <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 40px 20px; }
-        .wrapper { max-width: 860px; margin: 0 auto; background: #1e293b; border-radius: 12px; border: 1px solid #334155; padding: 36px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-        h1 { color: #60a5fa; margin-top: 0; font-size: 28px; }
-        p { color: #94a3b8; font-size: 15px; line-height: 1.6; }
-        .badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
-        .badge-success { background: #065f46; color: #34d399; }
-        .badge-warning { background: #78350f; color: #fbbf24; }
-        .badge-info { background: #1e3a8a; color: #93c5fd; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 24px 0; }
-        .card { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 18px; }
-        .card h3 { margin: 0 0 8px 0; font-size: 16px; color: #f1f5f9; }
-        .card p { margin: 0; font-size: 13px; color: #94a3b8; }
-        .btn-group { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 12px; }
-        .btn { display: inline-block; background: #2563eb; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 14px; transition: background 0.2s; }
-        .btn:hover { background: #1d4ed8; }
-        .btn-alt { background: #334155; color: #f8fafc; }
-        .btn-alt:hover { background: #475569; }
-        code { background: #0f172a; padding: 2px 6px; border-radius: 4px; color: #38bdf8; font-family: monospace; }
-      </style>
-    </head>
-    <body>
-      <div class="wrapper">
-        <h1>🔐 SMTP Backend Suite & Authentication API</h1>
-        <p>
-          Production-grade Node.js backend equipped with dynamic Handlebars email templating,
-          cryptographic OTP verification, comprehensive authentication workflows, and full resource CRUD operations.
-        </p>
+// Static assets (CSS, JS, media)
+app.use(express.static(path.join(__dirname, 'public')));
 
-        <div class="grid">
-          <div class="card">
-            <h3>Database Status</h3>
-            <p>Dialect: <code>${getActiveDialect()}</code></p>
-            <p style="margin-top: 6px;"><span class="badge badge-success">Connected</span></p>
-          </div>
-          <div class="card">
-            <h3>SMTP Service</h3>
-            <p>Host: <code>${smtp.host}:${smtp.port}</code></p>
-            <p style="margin-top: 6px;">
-              <span class="badge ${smtp.connected ? 'badge-success' : 'badge-warning'}">
-                ${smtp.connected ? 'Verified Ready' : 'Standby / Fallback'}
-              </span>
-            </p>
-          </div>
-          <div class="card">
-            <h3>Templating Engine</h3>
-            <p>Handlebars with responsive <code>main.handlebars</code> master layout & dark mode support.</p>
-          </div>
-        </div>
+// Web Application Handlebars Routes
+app.use('/', webRoutes);
 
-        <div class="btn-group">
-          <a href="/api/v1/previews" class="btn">Live Email Previews &rarr;</a>
-          <a href="/api/v1/health" class="btn btn-alt">System Health JSON</a>
-        </div>
-      </div>
-    </body>
-    </html>
-  `);
-});
-
-// API Routes
+// API v1 Routes
 app.use('/api/v1', apiRoutes);
 
 // 404 and Centralized Error Handling
@@ -132,39 +93,47 @@ const startServer = async () => {
 
     server = app.listen(PORT, () => {
       console.log('====================================================');
-      console.log(`🚀 Server successfully listening on http://localhost:${PORT}`);
-      console.log(`📧 Live Email Previews: http://localhost:${PORT}/api/v1/previews`);
-      console.log(`🩺 Health Diagnostics:  http://localhost:${PORT}/api/v1/health`);
+      console.log(`🚀 Handlebars Web App & API running on http://localhost:${PORT}`);
+      console.log(`📊 Web Dashboard:       http://localhost:${PORT}/dashboard`);
+      console.log(`🔐 Sign In:              http://localhost:${PORT}/login`);
+      console.log(`📧 Live Email Previews: http://localhost:${PORT}/templates`);
+      console.log(`🩺 Health Diagnostics:  http://localhost:${PORT}/diagnostics`);
       console.log('====================================================');
     });
   } catch (error) {
-    console.error(`[Server Startup Failure] ${error.message}`);
+    console.error('[Server] Startup sequence failed:', error.message);
+    if (error.stack) console.error(error.stack);
     process.exit(1);
   }
 };
 
 // ─── Graceful shutdown ───
-const gracefulShutdown = async (signal) => {
+const shutdown = async (signal) => {
   console.log(`\n[Server] Received ${signal}. Starting graceful shutdown...`);
-
   if (server) {
-    server.close(() => {
-      console.log('[Server] HTTP server closed. No longer accepting connections.');
+    server.close(async () => {
+      console.log('[Server] HTTP server closed.');
+      try {
+        await closeDatabase();
+        console.log('[Server] Database connections closed cleanly.');
+      } catch (err) {
+        console.error('[Server] Error closing database connections:', err.message);
+      }
+      process.exit(0);
     });
-  }
 
-  try {
-    await closeDatabase();
-  } catch (err) {
-    console.error(`[Server] Error during database shutdown: ${err.message}`);
+    // Force shutdown after 10s timeout
+    setTimeout(() => {
+      console.error('[Server] Forced shutdown timeout exceeded. Exiting.');
+      process.exit(1);
+    }, 10000);
+  } else {
+    process.exit(0);
   }
-
-  console.log('[Server] Shutdown complete. Goodbye.');
-  process.exit(0);
 };
 
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
 
 startServer();
 

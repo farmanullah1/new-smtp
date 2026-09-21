@@ -1,0 +1,74 @@
+<div>
+  <div class="page-header">
+    <div>
+      <h1 style="font-size: 28px; margin-bottom: 4px;">Handlebars Email Templates</h1>
+      <p style="color: #94a3b8; font-size: 14px;">
+        Live visual previews of all 10 responsive email templates compiled with sample context datasets
+      </p>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button class="btn btn-secondary btn-sm" id="btn-device-desktop" onclick="setDevice('desktop')">
+        🖥️ Desktop
+      </button>
+      <button class="btn btn-secondary btn-sm" id="btn-device-mobile" onclick="setDevice('mobile')">
+        📱 Mobile
+      </button>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start;">
+    <!-- Template Sidebar -->
+    <div class="glass-panel" style="padding: 16px; display: flex; flex-direction: column; gap: 6px; max-height: 800px; overflow-y: auto;">
+      {{#each templateList}}
+        <a href="/templates?template={{this.id}}" class="btn {{#if (eq ../activeTemplate.id this.id)}}btn-primary{{else}}btn-secondary{{/if}}" style="text-align: left; justify-content: flex-start; padding: 12px 14px; text-decoration: none;">
+          <div style="width: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <span style="font-size: 13px; font-weight: 700;">{{this.name}}</span>
+              <span class="badge {{#if (eq ../activeTemplate.id this.id)}}badge-info{{else}}badge-muted{{/if}}" style="font-size: 9px;">{{this.badge}}</span>
+            </div>
+            <div style="font-size: 11px; color: #94a3b8; line-height: 1.3;">{{this.desc}}</div>
+          </div>
+        </a>
+      {{/each}}
+    </div>
+
+    <!-- Preview Canvas -->
+    <div class="glass-panel" style="padding: 24px; display: flex; flex-direction: column; align-items: center;">
+      <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 12px;">
+        <div>
+          <span style="font-size: 16px; font-weight: 700; color: #f8fafc;">{{activeTemplate.name}}</span>
+          <span style="font-size: 12px; color: #64748b; margin-left: 8px;">(Template: {{activeTemplate.id}}.handlebars)</span>
+        </div>
+        <a href="/api/v1/previews/{{activeTemplate.id}}" target="_blank" class="btn btn-secondary btn-sm">
+          ↗ Open Raw HTML
+        </a>
+      </div>
+
+      <!-- Iframe device container -->
+      <div id="preview-wrapper" style="width: 100%; max-width: 720px; transition: max-width 0.3s ease; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);">
+        <iframe id="preview-iframe" src="/api/v1/previews/{{activeTemplate.id}}" style="width: 100%; height: 680px; border: none; display: block;" title="Email Template Preview"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function setDevice(device) {
+    const wrapper = document.getElementById('preview-wrapper');
+    const btnDesktop = document.getElementById('btn-device-desktop');
+    const btnMobile = document.getElementById('btn-device-mobile');
+    if (device === 'mobile') {
+      wrapper.style.maxWidth = '375px';
+      btnMobile.classList.add('btn-primary');
+      btnMobile.classList.remove('btn-secondary');
+      btnDesktop.classList.add('btn-secondary');
+      btnDesktop.classList.remove('btn-primary');
+    } else {
+      wrapper.style.maxWidth = '720px';
+      btnDesktop.classList.add('btn-primary');
+      btnDesktop.classList.remove('btn-secondary');
+      btnMobile.classList.add('btn-secondary');
+      btnMobile.classList.remove('btn-primary');
+    }
+  }
+</script>
