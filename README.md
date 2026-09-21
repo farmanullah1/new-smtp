@@ -18,7 +18,7 @@ A production-ready Node.js backend application featuring native **SMTP email del
 
 ## 📁 Architecture & File Layout
 
-```
+```text
 new smtp/
 ├── .env                                         # Environment variables (SMTP, MSSQL, JWT, Port)
 ├── package.json                                 # Dependencies and scripts
@@ -108,16 +108,18 @@ DB_PASS=your_db_password
 DB_PORT=1433
 ```
 
-
 ---
 
 ## 🏃 Getting Started
 
 ### 1. Run the Application
+
 ```bash
 npm start
 ```
+
 Or with auto-restart on file change:
+
 ```bash
 npm run dev
 ```
@@ -125,9 +127,11 @@ npm run dev
 The server will start on `http://localhost:3000`.
 
 ### 2. Run Automated Integration Tests
+
 ```bash
 npm test
 ```
+
 The test suite executes 10 comprehensive tests covering database connectivity, SMTP verification, user signup, OTP verification, login, profile management, CRUD operations, password reset, and email change.
 
 ---
@@ -167,15 +171,17 @@ You can preview all 10 responsive Handlebars email templates directly in your br
 ## 📡 API Reference
 
 ### Health & Diagnostics
+
 | Method | Endpoint | Description | Auth |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `GET` | `/` | Service root and visual dashboard | None |
 | `GET` | `/api/v1/health` | System status, DB, and SMTP diagnostics | None |
 | `POST` | `/api/v1/test-email` | Dispatches a live test email via SMTP | None |
 
 ### Authentication (`/api/v1/auth`)
+
 | Method | Endpoint | Description | Auth |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `POST` | `/signup` | Register new user; dispatches verification OTP | None |
 | `POST` | `/verify-email` | Validates OTP, activates account, sends welcome email | None |
 | `POST` | `/resend-otp` | Re-issues fresh verification OTP | None |
@@ -190,8 +196,9 @@ You can preview all 10 responsive Handlebars email templates directly in your br
 | `POST` | `/logout` | Invalidation endpoint | Bearer Token |
 
 ### User Profile (`/api/v1/users`)
+
 | Method | Endpoint | Description | Auth |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `GET` | `/me` | Get current authenticated user profile | Bearer Token |
 | `PUT` | `/me` | Update profile fields (name, phone, bio, avatar) | Bearer Token |
 | `PUT` | `/me/password` | Change password while logged in | Bearer Token |
@@ -200,8 +207,9 @@ You can preview all 10 responsive Handlebars email templates directly in your br
 | `DELETE` | `/me` | Delete account permanently | Bearer Token |
 
 ### Resource CRUD (`/api/v1/items`)
+
 | Method | Endpoint | Description | Auth |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | `POST` | `/` | Create a new item resource | Bearer Token |
 | `GET` | `/` | List items (pagination, filters: `status`, `category`, `q`) | Bearer Token |
 | `GET` | `/stats` | Aggregate item counts | Bearer Token |
