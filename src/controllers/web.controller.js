@@ -246,7 +246,7 @@ const renderDashboard = async (req, res) => {
       activeNav: 'dashboard',
       items: plainItems,
       pagination: itemsResult.pagination,
-      stats: statsResult.stats,
+      stats: statsResult?.stats || statsResult || { total: 0, active: 0, draft: 0, archived: 0 },
       query: { q, status, category, sort: sortParam },
       hasActiveFilters,
       successMessage: req.query.success,

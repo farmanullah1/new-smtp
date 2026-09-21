@@ -16,6 +16,9 @@ const helpers = {
   add: (a, b) => Number(a) + Number(b),
   subtract: (a, b) => Number(a) - Number(b),
 
+  // Fallback / Defaults
+  defaultVal: (val, fallback) => (val !== undefined && val !== null ? val : fallback),
+
   // Logical operators (safely strips Handlebars options object from arguments)
   and: (...args) => {
     const values = args.slice(0, -1);
