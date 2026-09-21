@@ -8,8 +8,7 @@ const crypto = require('crypto');
 const cookieParser = require('cookie-parser');
 const { engine } = require('express-handlebars');
 
-const { initDatabase, getActiveDialect } = require('./src/config/database');
-const { closeDatabase } = require('./src/config/database');
+const { initDatabase, getActiveDialect, closeDatabase } = require('./src/config/database');
 const { verifyEmailTransporter, getSmtpStatus } = require('./src/config/email');
 const apiRoutes = require('./src/routes');
 const webRoutes = require('./src/routes/web.routes');
@@ -20,8 +19,10 @@ const PORT = process.env.PORT || 3000;
 
 // ─── Handlebars Web View Engine Setup ───
 app.engine('handlebars', engine({
+  extname: '.handlebars',
   defaultLayout: 'web',
   layoutsDir: path.join(__dirname, 'src/views/layouts'),
+  partialsDir: path.join(__dirname, 'src/views/partials'),
   helpers: {
     eq: (a, b) => a === b,
     gt: (a, b) => a > b,
@@ -29,8 +30,8 @@ app.engine('handlebars', engine({
     add: (a, b) => Number(a) + Number(b),
     subtract: (a, b) => Number(a) - Number(b),
     json: (obj) => JSON.stringify(obj),
-    formatDate: (d) => d ? new Date(d).toLocaleDateString() : '',
-    userInitial: (name) => name ? name[0].toUpperCase() : 'U',
+    formatDate: (d) => (d ? new Date(d).toLocaleDateString() : ''),
+    userInitial: (name) => (name ? name[0].toUpperCase() : 'U'),
     currentYear: () => new Date().getFullYear()
   }
 }));
@@ -63,7 +64,7 @@ app.use(helmet({
   contentSecurityPolicy: false // Allows email preview rendering in browser iframe
 }));
 app.use(cors());
-app.use(morgan(':method :url :status :response-time ms - :req[x-request-id]'));
+app.use(morgan(':method :url :status :response-time ms - :res[x-request-id]'));
 app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
