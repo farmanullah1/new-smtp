@@ -24,10 +24,14 @@ app.use((req, res, next) => {
 // ─── Response time middleware ───
 app.use((req, res, next) => {
   const start = process.hrtime.bigint();
-  res.on('finish', () => {
-    const elapsed = Number(process.hrtime.bigint() - start) / 1e6;
-    res.setHeader('X-Response-Time', `${elapsed.toFixed(2)}ms`);
-  });
+  const originalWriteHead = res.writeHead;
+  res.writeHead = function (...args) {
+    if (!res.headersSent) {
+      const elapsed = Number(process.hrtime.bigint() - start) / 1e6;
+      res.setHeader('X-Response-Time', `${elapsed.toFixed(2)}ms`);
+    }
+    return originalWriteHead.apply(this, args);
+  };
   next();
 });
 
