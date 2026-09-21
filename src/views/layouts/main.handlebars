@@ -6,77 +6,142 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
   <title>{{subject}}</title>
   <style>
+    :root { color-scheme: light dark; supported-color-schemes: light dark; }
+
     body {
       margin: 0;
       padding: 0;
       width: 100% !important;
-      background-color: #f1f5f9;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f0f4f8;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
       color: #1e293b;
     }
-    table {
-      border-collapse: collapse;
-      mso-table-lspace: 0pt;
-      mso-table-rspace: 0pt;
-    }
-    img {
-      border: 0;
-      line-height: 100%;
-      outline: none;
-      text-decoration: none;
-    }
+    table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { border: 0; line-height: 100%; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }
+
     .wrapper {
       width: 100%;
       table-layout: fixed;
-      background-color: #f1f5f9;
-      padding: 30px 10px;
+      background-color: #f0f4f8;
+      padding: 32px 12px;
     }
+    .preheader {
+      display: none !important;
+      max-height: 0;
+      max-width: 0;
+      overflow: hidden;
+      mso-hide: all;
+      font-size: 1px;
+      line-height: 1px;
+      color: #f0f4f8;
+    }
+
+    /* Top accent gradient */
+    .accent-bar {
+      height: 5px;
+      background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 25%, #06b6d4 50%, #10b981 75%, #3b82f6 100%);
+      border-radius: 12px 12px 0 0;
+    }
+
     .main-card {
-      max-width: 580px;
+      max-width: 600px;
       margin: 0 auto;
       background-color: #ffffff;
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.08);
       border: 1px solid #e2e8f0;
     }
     .header-bar {
-      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-      padding: 28px 32px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #2563eb 100%);
+      padding: 32px 36px 28px 36px;
       text-align: center;
+    }
+    .brand-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      font-size: 24px;
+      line-height: 1;
     }
     .brand-title {
       color: #ffffff;
       font-size: 22px;
-      font-weight: 700;
+      font-weight: 800;
       letter-spacing: -0.5px;
       margin: 0;
     }
     .brand-subtitle {
-      color: #bfdbfe;
-      font-size: 13px;
+      color: #93c5fd;
+      font-size: 12px;
       font-weight: 500;
-      margin-top: 4px;
+      margin-top: 6px;
       margin-bottom: 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
-    .content-body {
-      padding: 36px 32px 24px 32px;
-      font-size: 15px;
-      line-height: 1.6;
-      color: #334155;
-    }
-    .otp-code-box {
-      background-color: #f8fafc;
-      border: 2px dashed #cbd5e1;
-      border-radius: 10px;
-      padding: 18px 24px;
+    .header-date {
+      color: #64748b;
+      font-size: 11px;
       text-align: center;
+      padding: 10px 36px;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .content-body {
+      padding: 36px 36px 28px 36px;
+      font-size: 15px;
+      line-height: 1.7;
+      color: #374151;
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, #e2e8f0 20%, #e2e8f0 80%, transparent 100%);
       margin: 24px 0;
     }
-    .otp-digits {
+
+    /* OTP Code Box — individual digit cells */
+    .otp-code-box {
+      text-align: center;
+      margin: 28px 0;
+    }
+    .otp-digits-row {
+      display: inline-flex;
+      gap: 8px;
+      margin: 0 auto;
+    }
+    .otp-digit-cell {
+      display: inline-block;
+      width: 48px;
+      height: 56px;
+      line-height: 56px;
+      text-align: center;
+      font-size: 28px;
+      font-weight: 800;
+      color: #1e3a8a;
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 2px solid #cbd5e1;
+      border-radius: 10px;
+      font-family: 'Courier New', Courier, monospace;
+      letter-spacing: 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+    }
+    .otp-fallback {
       font-size: 34px;
       font-weight: 800;
       letter-spacing: 8px;
@@ -87,122 +152,244 @@
     .otp-subtext {
       font-size: 12px;
       color: #64748b;
-      margin-top: 6px;
+      margin-top: 10px;
       margin-bottom: 0;
       font-weight: 500;
     }
+    .otp-timer-badge {
+      display: inline-block;
+      background: #fef3c7;
+      color: #b45309;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-top: 8px;
+    }
+
+    /* Badges */
     .badge {
       display: inline-block;
-      padding: 4px 10px;
+      padding: 5px 12px;
       border-radius: 9999px;
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 11px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.8px;
     }
-    .badge-info {
-      background-color: #e0f2fe;
-      color: #0369a1;
-    }
-    .badge-warning {
-      background-color: #fef3c7;
-      color: #b45309;
-    }
-    .badge-danger {
-      background-color: #fee2e2;
-      color: #b91c1c;
-    }
-    .badge-success {
-      background-color: #dcfce7;
-      color: #15803d;
-    }
+    .badge-info    { background-color: #dbeafe; color: #1d4ed8; }
+    .badge-warning { background-color: #fef3c7; color: #b45309; }
+    .badge-danger  { background-color: #fee2e2; color: #b91c1c; }
+    .badge-success { background-color: #dcfce7; color: #15803d; }
+
+    /* Action Button */
     .action-button {
       display: inline-block;
       background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
       color: #ffffff !important;
       text-decoration: none;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 14px;
-      padding: 12px 28px;
-      border-radius: 8px;
-      margin: 20px 0;
+      padding: 14px 32px;
+      border-radius: 10px;
+      margin: 24px 0;
       text-align: center;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+      letter-spacing: 0.3px;
     }
+
+    /* Meta Table */
     .meta-table {
       width: 100%;
-      margin: 18px 0;
+      margin: 20px 0;
       background-color: #f8fafc;
-      border-radius: 8px;
+      border-radius: 10px;
       border: 1px solid #e2e8f0;
+      overflow: hidden;
     }
     .meta-table td {
-      padding: 10px 14px;
+      padding: 12px 16px;
       font-size: 13px;
       border-bottom: 1px solid #e2e8f0;
     }
-    .meta-table tr:last-child td {
-      border-bottom: none;
-    }
+    .meta-table tr:last-child td { border-bottom: none; }
     .meta-label {
-      font-weight: 600;
+      font-weight: 700;
       color: #475569;
-      width: 35%;
+      width: 38%;
+      white-space: nowrap;
     }
-    .meta-val {
-      color: #0f172a;
-      font-weight: 500;
-    }
+    .meta-val { color: #0f172a; font-weight: 500; }
+
+    /* Security Notice */
     .security-notice {
       background-color: #fffbeb;
       border-left: 4px solid #f59e0b;
-      padding: 14px 16px;
-      border-radius: 0 8px 8px 0;
-      margin: 22px 0 10px 0;
+      padding: 16px 18px;
+      border-radius: 0 10px 10px 0;
+      margin: 24px 0 12px 0;
       font-size: 13px;
       color: #78350f;
+      line-height: 1.6;
     }
+    .security-notice strong { color: #92400e; }
+
+    /* Feature Grid */
+    .feature-grid {
+      margin: 20px 0;
+    }
+    .feature-card {
+      display: inline-block;
+      width: 30%;
+      vertical-align: top;
+      text-align: center;
+      padding: 16px 8px;
+    }
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      line-height: 44px;
+      border-radius: 12px;
+      font-size: 20px;
+      margin: 0 auto 10px auto;
+      display: block;
+    }
+    .feature-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 4px;
+    }
+    .feature-desc {
+      font-size: 11px;
+      color: #64748b;
+      line-height: 1.4;
+    }
+
+    /* Steps */
+    .step-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .step-number {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 14px;
+      text-align: center;
+      line-height: 32px;
+    }
+    .step-text {
+      font-size: 14px;
+      color: #475569;
+      padding-top: 4px;
+    }
+
+    /* Checklist */
+    .check-item {
+      padding: 8px 0;
+      font-size: 14px;
+      color: #374151;
+    }
+    .check-icon {
+      display: inline-block;
+      width: 22px;
+      height: 22px;
+      line-height: 22px;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 13px;
+      margin-right: 10px;
+      background: #dcfce7;
+      color: #16a34a;
+      font-weight: 700;
+    }
+
+    /* Footer */
     .footer-bar {
       background-color: #f8fafc;
       border-top: 1px solid #e2e8f0;
-      padding: 24px 32px;
+      padding: 28px 36px;
       text-align: center;
       font-size: 12px;
       color: #64748b;
-      line-height: 1.5;
+      line-height: 1.6;
     }
     .footer-links a {
-      color: #3b82f6;
+      color: #2563eb;
       text-decoration: none;
-      margin: 0 8px;
+      font-weight: 600;
+      margin: 0 10px;
     }
-    @media only screen and (max-width: 600px) {
-      .main-card {
-        width: 100% !important;
-        border-radius: 8px !important;
-      }
-      .content-body {
-        padding: 24px 18px !important;
-      }
-      .header-bar {
-        padding: 20px 18px !important;
-      }
-      .otp-digits {
-        font-size: 28px !important;
-        letter-spacing: 5px !important;
-      }
+    .footer-brand {
+      margin: 16px 0 0 0;
+      padding-top: 16px;
+      border-top: 1px solid #e2e8f0;
+      color: #94a3b8;
+      font-size: 11px;
+    }
+
+    /* Responsive */
+    @media only screen and (max-width: 620px) {
+      .main-card { width: 100% !important; border-radius: 8px !important; }
+      .content-body { padding: 24px 20px !important; }
+      .header-bar { padding: 24px 20px 20px 20px !important; }
+      .footer-bar { padding: 20px !important; }
+      .otp-digit-cell { width: 40px !important; height: 48px !important; line-height: 48px !important; font-size: 22px !important; }
+      .otp-fallback { font-size: 26px !important; letter-spacing: 5px !important; }
+      .action-button { padding: 12px 24px !important; font-size: 13px !important; }
+      .meta-table td { padding: 10px 12px !important; font-size: 12px !important; }
+      .feature-card { width: 100% !important; display: block !important; padding: 10px 0 !important; text-align: left !important; }
+      .feature-icon { display: inline-block !important; vertical-align: middle !important; margin: 0 12px 0 0 !important; }
+      .feature-title, .feature-desc { display: inline !important; }
+    }
+
+    /* Dark mode for supporting email clients */
+    @media (prefers-color-scheme: dark) {
+      body, .wrapper { background-color: #111827 !important; }
+      .main-card { background-color: #1f2937 !important; border-color: #374151 !important; }
+      .content-body { color: #d1d5db !important; }
+      .content-body h2 { color: #f9fafb !important; }
+      .content-body p { color: #d1d5db !important; }
+      .meta-table { background-color: #111827 !important; border-color: #374151 !important; }
+      .meta-table td { border-color: #374151 !important; }
+      .meta-label { color: #9ca3af !important; }
+      .meta-val { color: #e5e7eb !important; }
+      .otp-digit-cell { background: #111827 !important; border-color: #4b5563 !important; color: #60a5fa !important; }
+      .security-notice { background-color: #292524 !important; color: #fbbf24 !important; }
+      .footer-bar { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
+      .header-date { background-color: #111827 !important; border-color: #374151 !important; color: #9ca3af !important; }
     }
   </style>
 </head>
 <body>
+  <!-- Preheader text (hidden preview text in email clients) -->
+  <span class="preheader">{{#if preheaderText}}{{preheaderText}}{{else}}Notification from {{appName}}{{/if}}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;</span>
+
   <div class="wrapper">
     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
       <tr>
         <td align="center">
           <div class="main-card">
+            <!-- Top Accent Bar -->
+            <div class="accent-bar"></div>
+
             <!-- Header -->
             <div class="header-bar">
+              <div class="brand-icon">🔐</div>
               <h1 class="brand-title">{{appName}}</h1>
-              <p class="brand-subtitle">Secure Notification & Authentication Services</p>
+              <p class="brand-subtitle">Secure Notification &amp; Authentication</p>
+            </div>
+
+            <!-- Date line -->
+            <div class="header-date">
+              📅 {{formattedDate}}
             </div>
 
             <!-- Dynamic Body Injected Here -->
@@ -212,16 +399,16 @@
 
             <!-- Footer -->
             <div class="footer-bar">
-              <p style="margin: 0 0 8px 0;">This is an automated system email sent to <strong>{{recipientEmail}}</strong>.</p>
-              <p style="margin: 0 0 12px 0;">Please do not reply directly to this email.</p>
+              <p style="margin: 0 0 10px 0;">This is an automated system notification sent to <strong>{{recipientEmail}}</strong>.</p>
+              <p style="margin: 0 0 14px 0; font-size: 11px;">Please do not reply directly to this message.</p>
               <div class="footer-links">
-                <a href="{{clientUrl}}/help">Support Center</a> &bull;
-                <a href="{{clientUrl}}/privacy">Privacy Policy</a> &bull;
-                <a href="{{clientUrl}}/security">Security Details</a>
+                <a href="{{clientUrl}}/help">Support</a> &bull;
+                <a href="{{clientUrl}}/privacy">Privacy</a> &bull;
+                <a href="{{clientUrl}}/security">Security</a>
               </div>
-              <p style="margin: 14px 0 0 0; color: #94a3b8; font-size: 11px;">
+              <div class="footer-brand">
                 &copy; {{currentYear}} {{appName}}. All rights reserved.
-              </p>
+              </div>
             </div>
           </div>
         </td>

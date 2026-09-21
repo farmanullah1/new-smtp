@@ -1,26 +1,42 @@
 <div style="text-align: left;">
   <span class="badge badge-danger">Account Closed</span>
-  <h2 style="color: #0f172a; margin: 12px 0 8px 0; font-size: 20px;">Account Successfully Deleted</h2>
-  <p style="color: #475569; margin: 0 0 16px 0;">
-    Hello <strong>{{name}}</strong>, your account associated with <strong>{{recipientEmail}}</strong> and all corresponding active sessions have been permanently closed.
+  <h2 style="color: #0f172a; margin: 14px 0 8px 0; font-size: 22px; font-weight: 800;">Account Deleted</h2>
+  <p style="color: #475569; margin: 0 0 20px 0;">
+    Hello <strong>{{name}}</strong>, your <strong>{{appName}}</strong> account and all active sessions have been permanently closed as requested.
   </p>
+
+  <!-- Farewell visual -->
+  <div style="text-align: center; margin: 28px 0;">
+    <div style="display: inline-block; width: 64px; height: 64px; line-height: 64px; border-radius: 50%; background: linear-gradient(135deg, #fee2e2, #fecaca); font-size: 32px; text-align: center;">👋</div>
+    <p style="color: #6b7280; font-weight: 600; font-size: 14px; margin: 10px 0 0 0;">We're sorry to see you go</p>
+  </div>
 
   <table class="meta-table" role="presentation">
     <tr>
-      <td class="meta-label">Deletion Time:</td>
+      <td class="meta-label">📧 Account Email:</td>
+      <td class="meta-val">{{recipientEmail}}</td>
+    </tr>
+    <tr>
+      <td class="meta-label">🕐 Deleted At:</td>
       <td class="meta-val">{{formattedDate}}</td>
     </tr>
     <tr>
-      <td class="meta-label">Requested From IP:</td>
-      <td class="meta-val">{{ipAddress}}</td>
+      <td class="meta-label">🌐 Requested From:</td>
+      <td class="meta-val"><code style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 13px; color: #1e293b;">{{ipAddress}}</code></td>
     </tr>
   </table>
 
-  <p style="color: #475569; font-size: 14px; margin: 16px 0;">
-    We're sorry to see you go! If you ever decide to return, you are always welcome to create a new account.
+  <div class="divider"></div>
+
+  <p style="color: #475569; font-size: 14px; margin: 16px 0; line-height: 1.7;">
+    All personal data associated with your account has been removed from our systems. If you ever decide to return, you are always welcome to create a new account.
   </p>
 
+  <div style="text-align: center;">
+    <a href="{{clientUrl}}" class="action-button" style="background: linear-gradient(135deg, #6b7280, #4b5563); box-shadow: 0 4px 14px rgba(107, 114, 128, 0.3);">Visit {{appName}} &rarr;</a>
+  </div>
+
   <div class="security-notice">
-    If this deletion was performed by error or without your permission, please contact customer support immediately.
+    <strong>⚠️ Important:</strong> If this deletion was not authorized by you, please contact our support team immediately. Deleted accounts may be recoverable within a limited time window.
   </div>
 </div>

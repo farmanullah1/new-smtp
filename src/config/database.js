@@ -9,6 +9,9 @@ const dbPort = parseInt(process.env.DB_PORT, 10) || 1433;
 let sequelize;
 let activeDialect = 'mssql';
 
+// Listeners that need to rebind when the sequelize instance changes (e.g. on SQLite fallback)
+const rebindCallbacks = [];
+
 // Build MSSQL instance with Windows Auth or credentials
 const createMssqlSequelize = () => {
   return new Sequelize(database, process.env.DB_USER || null, process.env.DB_PASS || null, {
@@ -49,6 +52,14 @@ const createSqliteSequelize = () => {
 // Initialize with MSSQL by default or fallback
 sequelize = createMssqlSequelize();
 
+/**
+ * Register a callback to be invoked whenever the Sequelize instance changes
+ * (e.g., after a SQLite fallback). The callback receives the new instance.
+ */
+const onSequelizeChange = (callback) => {
+  rebindCallbacks.push(callback);
+};
+
 const initDatabase = async () => {
   try {
     console.log(`[Database] Attempting connection to Microsoft SQL Server (${server}/${database})...`);
@@ -62,6 +73,11 @@ const initDatabase = async () => {
     await sequelize.authenticate();
     console.log('[Database] Connected successfully to SQLite database.');
     activeDialect = 'sqlite';
+
+    // Notify all registered listeners of the new instance
+    for (const cb of rebindCallbacks) {
+      cb(sequelize);
+    }
   }
 
   // Synchronize models
@@ -73,9 +89,25 @@ const initDatabase = async () => {
 const getSequelize = () => sequelize;
 const getActiveDialect = () => activeDialect;
 
+/**
+ * Gracefully close the database connection
+ */
+const closeDatabase = async () => {
+  try {
+    if (sequelize) {
+      await sequelize.close();
+      console.log('[Database] Connection closed gracefully.');
+    }
+  } catch (error) {
+    console.error(`[Database] Error closing connection: ${error.message}`);
+  }
+};
+
 module.exports = {
   sequelize,
   getSequelize,
   getActiveDialect,
-  initDatabase
+  initDatabase,
+  closeDatabase,
+  onSequelizeChange
 };

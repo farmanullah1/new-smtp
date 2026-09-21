@@ -1,38 +1,59 @@
 <div style="text-align: left;">
   <span class="badge badge-success">Account Activated</span>
-  <h2 style="color: #0f172a; margin: 12px 0 8px 0; font-size: 20px;">Your Email is Verified!</h2>
-  <p style="color: #475569; margin: 0 0 16px 0;">
-    Hello <strong>{{name}}</strong>, your account has been successfully verified and is now fully active. We are thrilled to have you with us!
+  <h2 style="color: #0f172a; margin: 14px 0 8px 0; font-size: 22px; font-weight: 800;">🎉 You're All Set, {{name}}!</h2>
+  <p style="color: #475569; margin: 0 0 20px 0;">
+    Your email has been verified and your <strong>{{appName}}</strong> account is now fully active. We're thrilled to have you on board!
   </p>
 
   <table class="meta-table" role="presentation">
     <tr>
-      <td class="meta-label">Account Name:</td>
+      <td class="meta-label">👤 Account Name:</td>
       <td class="meta-val">{{name}}</td>
     </tr>
     <tr>
-      <td class="meta-label">Primary Email:</td>
+      <td class="meta-label">📧 Primary Email:</td>
       <td class="meta-val">{{recipientEmail}}</td>
     </tr>
     <tr>
-      <td class="meta-label">Account Role:</td>
+      <td class="meta-label">🏷️ Account Role:</td>
       <td class="meta-val"><span class="badge badge-info">{{role}}</span></td>
     </tr>
     <tr>
-      <td class="meta-label">Activated At:</td>
+      <td class="meta-label">✅ Activated At:</td>
       <td class="meta-val">{{formattedDate}}</td>
     </tr>
   </table>
 
-  <p style="color: #475569; margin: 16px 0;">
-    You can now sign in to your dashboard to manage your profile, access CRUD resources, and explore the API.
-  </p>
+  <div class="divider"></div>
+
+  <!-- Feature Cards -->
+  <p style="font-weight: 700; color: #1e293b; margin-bottom: 16px; font-size: 15px;">What you can do next:</p>
+
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td style="width: 33%; text-align: center; vertical-align: top; padding: 12px 6px;">
+        <div class="feature-icon" style="background: #dbeafe; color: #2563eb;">👤</div>
+        <div class="feature-title">Manage Profile</div>
+        <div class="feature-desc">Update your name, email, and password</div>
+      </td>
+      <td style="width: 33%; text-align: center; vertical-align: top; padding: 12px 6px;">
+        <div class="feature-icon" style="background: #dcfce7; color: #16a34a;">📦</div>
+        <div class="feature-title">CRUD Resources</div>
+        <div class="feature-desc">Create, read, update, and delete items</div>
+      </td>
+      <td style="width: 33%; text-align: center; vertical-align: top; padding: 12px 6px;">
+        <div class="feature-icon" style="background: #fef3c7; color: #d97706;">🔐</div>
+        <div class="feature-title">Stay Secure</div>
+        <div class="feature-desc">Review login history and security alerts</div>
+      </td>
+    </tr>
+  </table>
 
   <div style="text-align: center;">
-    <a href="{{clientUrl}}/login" class="action-button">Go to Login &rarr;</a>
+    <a href="{{clientUrl}}/login" class="action-button">Go to Dashboard &rarr;</a>
   </div>
 
   <div class="security-notice" style="border-left-color: #10b981; background-color: #f0fdf4; color: #166534;">
-    <strong>Tip:</strong> Keep your credentials safe and enable Two-Factor Authentication (2FA) in your profile settings for enhanced protection.
+    <strong>💡 Tip:</strong> Keep your credentials safe. Review your login history regularly from the Profile page and change your password periodically for enhanced protection.
   </div>
 </div>

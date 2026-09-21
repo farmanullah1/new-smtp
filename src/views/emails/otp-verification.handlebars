@@ -1,20 +1,34 @@
 <div style="text-align: left;">
   <span class="badge badge-info">Security Verification</span>
-  <h2 style="color: #0f172a; margin: 12px 0 8px 0; font-size: 20px;">Your One-Time Passcode (OTP)</h2>
-  <p style="color: #475569; margin: 0 0 16px 0;">
-    Hello <strong>{{name}}</strong>, you requested a security code for: <strong>{{purposeLabel}}</strong>.
+  <h2 style="color: #0f172a; margin: 14px 0 8px 0; font-size: 22px; font-weight: 800;">🔑 Your Security Code</h2>
+  <p style="color: #475569; margin: 0 0 6px 0;">
+    Hello <strong>{{name}}</strong>, a one-time verification code was requested for:
+  </p>
+  <p style="margin: 0 0 20px 0;">
+    <span class="badge badge-warning" style="font-size: 12px; padding: 6px 14px;">{{purposeLabel}}</span>
   </p>
 
+  <!-- OTP Individual Digit Cells -->
   <div class="otp-code-box">
-    <p class="otp-digits">{{otpCode}}</p>
-    <p class="otp-subtext">This code expires in {{expiryMinutes}} minutes</p>
+    <!--[if mso]>
+    <p class="otp-fallback">{{otpCode}}</p>
+    <![endif]-->
+    <!--[if !mso]><!-->
+    <div class="otp-digits-row">
+      {{#each otpDigits}}
+      <span class="otp-digit-cell">{{this}}</span>
+      {{/each}}
+    </div>
+    <!--<![endif]-->
+    <p class="otp-subtext">This code is valid for <strong>{{expiryMinutes}} minutes</strong></p>
+    <span class="otp-timer-badge">⏱ Expires: {{expiryMinutes}} min</span>
   </div>
 
   <p style="color: #475569; font-size: 14px; margin: 16px 0 0 0;">
-    Please enter this 6-digit code in your application to complete your request.
+    Enter this 6-digit code in the verification screen to complete your request.
   </p>
 
   <div class="security-notice">
-    <strong>Warning:</strong> Never disclose this code to anyone, including customer service agents. If you did not initiate this request, please change your account password immediately.
+    <strong>⚠️ Warning:</strong> Never disclose this code to anyone, including customer service agents. If you did not initiate this request, please change your account password immediately.
   </div>
 </div>

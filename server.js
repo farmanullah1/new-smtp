@@ -3,9 +3,10 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const path = require('path');
+const crypto = require('crypto');
 
 const { initDatabase, getActiveDialect } = require('./src/config/database');
+const { closeDatabase } = require('./src/config/database');
 const { verifyEmailTransporter, getSmtpStatus } = require('./src/config/email');
 const apiRoutes = require('./src/routes');
 const { notFoundHandler, errorHandler } = require('./src/middlewares/error.middleware');
@@ -13,12 +14,29 @@ const { notFoundHandler, errorHandler } = require('./src/middlewares/error.middl
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ─── Request ID middleware ───
+app.use((req, res, next) => {
+  req.id = crypto.randomUUID();
+  res.setHeader('X-Request-Id', req.id);
+  next();
+});
+
+// ─── Response time middleware ───
+app.use((req, res, next) => {
+  const start = process.hrtime.bigint();
+  res.on('finish', () => {
+    const elapsed = Number(process.hrtime.bigint() - start) / 1e6;
+    res.setHeader('X-Response-Time', `${elapsed.toFixed(2)}ms`);
+  });
+  next();
+});
+
 // Security & utility middlewares
 app.use(helmet({
   contentSecurityPolicy: false // Allows email preview rendering in browser
 }));
 app.use(cors());
-app.use(morgan('dev'));
+app.use(morgan(':method :url :status :response-time ms - :req[x-request-id]'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -54,7 +72,7 @@ app.get('/', (req, res) => {
     </head>
     <body>
       <div class="wrapper">
-        <h1>SMTP Backend Suite & Authentication API</h1>
+        <h1>🔐 SMTP Backend Suite & Authentication API</h1>
         <p>
           Production-grade Node.js backend equipped with dynamic Handlebars email templating,
           cryptographic OTP verification, comprehensive authentication workflows, and full resource CRUD operations.
@@ -77,7 +95,7 @@ app.get('/', (req, res) => {
           </div>
           <div class="card">
             <h3>Templating Engine</h3>
-            <p>Handlebars with responsive <code>main.handlebars</code> master layout.</p>
+            <p>Handlebars with responsive <code>main.handlebars</code> master layout & dark mode support.</p>
           </div>
         </div>
 
@@ -98,7 +116,8 @@ app.use('/api/v1', apiRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-// Server startup
+// ─── Server startup ───
+let server;
 const startServer = async () => {
   try {
     console.log('[Server] Initializing database...');
@@ -107,7 +126,7 @@ const startServer = async () => {
     console.log('[Server] Initializing email transporter...');
     await verifyEmailTransporter();
 
-    app.listen(PORT, () => {
+    server = app.listen(PORT, () => {
       console.log('====================================================');
       console.log(`🚀 Server successfully listening on http://localhost:${PORT}`);
       console.log(`📧 Live Email Previews: http://localhost:${PORT}/api/v1/previews`);
@@ -119,6 +138,29 @@ const startServer = async () => {
     process.exit(1);
   }
 };
+
+// ─── Graceful shutdown ───
+const gracefulShutdown = async (signal) => {
+  console.log(`\n[Server] Received ${signal}. Starting graceful shutdown...`);
+
+  if (server) {
+    server.close(() => {
+      console.log('[Server] HTTP server closed. No longer accepting connections.');
+    });
+  }
+
+  try {
+    await closeDatabase();
+  } catch (err) {
+    console.error(`[Server] Error during database shutdown: ${err.message}`);
+  }
+
+  console.log('[Server] Shutdown complete. Goodbye.');
+  process.exit(0);
+};
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 startServer();
 

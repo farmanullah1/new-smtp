@@ -1,26 +1,37 @@
 <div style="text-align: left;">
   <span class="badge badge-warning">Account Update</span>
-  <h2 style="color: #0f172a; margin: 12px 0 8px 0; font-size: 20px;">Email Address Updated</h2>
-  <p style="color: #475569; margin: 0 0 16px 0;">
-    Hello <strong>{{name}}</strong>, this is an official notice that the email address for your <strong>{{appName}}</strong> account has been changed from this address to:
+  <h2 style="color: #0f172a; margin: 14px 0 8px 0; font-size: 22px; font-weight: 800;">📬 Email Address Updated</h2>
+  <p style="color: #475569; margin: 0 0 20px 0;">
+    Hello <strong>{{name}}</strong>, this is a confirmation that the primary email address for your <strong>{{appName}}</strong> account has been successfully changed.
   </p>
 
-  <div style="background-color: #f1f5f9; padding: 14px; border-radius: 8px; text-align: center; font-weight: 700; color: #1e3a8a; font-size: 16px; margin: 16px 0;">
-    {{newEmail}}
-  </div>
+  <!-- Email transition visual -->
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
+    <tr>
+      <td style="width: 44%; text-align: center; padding: 14px; background: #fef2f2; border-radius: 10px; border: 1px solid #fecaca;">
+        <div style="font-size: 11px; color: #b91c1c; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px;">Previous Email</div>
+        <div style="font-size: 13px; color: #991b1b; font-weight: 600; word-break: break-all; text-decoration: line-through;">{{recipientEmail}}</div>
+      </td>
+      <td style="width: 12%; text-align: center; font-size: 22px; color: #10b981;">→</td>
+      <td style="width: 44%; text-align: center; padding: 14px; background: #f0fdf4; border-radius: 10px; border: 2px solid #10b981;">
+        <div style="font-size: 11px; color: #16a34a; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px;">New Email</div>
+        <div style="font-size: 13px; color: #15803d; font-weight: 700; word-break: break-all;">{{newEmail}}</div>
+      </td>
+    </tr>
+  </table>
 
   <table class="meta-table" role="presentation">
     <tr>
-      <td class="meta-label">Updated At:</td>
+      <td class="meta-label">🕐 Updated At:</td>
       <td class="meta-val">{{formattedDate}}</td>
     </tr>
     <tr>
-      <td class="meta-label">IP Address:</td>
-      <td class="meta-val">{{ipAddress}}</td>
+      <td class="meta-label">🌐 IP Address:</td>
+      <td class="meta-val"><code style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 13px; color: #1e293b;">{{ipAddress}}</code></td>
     </tr>
   </table>
 
   <div class="security-notice" style="border-left-color: #dc2626; background-color: #fef2f2; color: #991b1b;">
-    <strong>Didn't make this change?</strong> If you did NOT authorize this email change, your account may be compromised. Please contact support immediately at security@farmanullah.com to recover your account.
+    <strong>🚨 Didn't authorize this?</strong> If you did NOT request this email change, your account may be compromised. Please contact our support team immediately to recover your account.
   </div>
 </div>

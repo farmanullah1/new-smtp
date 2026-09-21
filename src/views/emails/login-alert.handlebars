@@ -1,34 +1,45 @@
 <div style="text-align: left;">
   <span class="badge badge-warning">Security Alert</span>
-  <h2 style="color: #0f172a; margin: 12px 0 8px 0; font-size: 20px;">New Login Detected</h2>
-  <p style="color: #475569; margin: 0 0 16px 0;">
-    Hello <strong>{{name}}</strong>, we detected a new sign-in to your <strong>{{appName}}</strong> account.
+  <h2 style="color: #0f172a; margin: 14px 0 8px 0; font-size: 22px; font-weight: 800;">🖥️ New Login Detected</h2>
+  <p style="color: #475569; margin: 0 0 20px 0;">
+    Hello <strong>{{name}}</strong>, we detected a new sign-in to your <strong>{{appName}}</strong> account. If this was you, no action is needed.
   </p>
 
   <table class="meta-table" role="presentation">
     <tr>
-      <td class="meta-label">Time:</td>
+      <td class="meta-label">🕐 Time:</td>
       <td class="meta-val">{{formattedDate}}</td>
     </tr>
     <tr>
-      <td class="meta-label">IP Address:</td>
-      <td class="meta-val">{{ipAddress}}</td>
+      <td class="meta-label">🌐 IP Address:</td>
+      <td class="meta-val"><code style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 13px; color: #1e293b;">{{ipAddress}}</code></td>
     </tr>
     <tr>
-      <td class="meta-label">Device / Client:</td>
-      <td class="meta-val">{{userAgent}}</td>
+      <td class="meta-label">💻 Device / Client:</td>
+      <td class="meta-val" style="font-size: 12px; word-break: break-all;">{{userAgent}}</td>
     </tr>
     <tr>
-      <td class="meta-label">Status:</td>
-      <td class="meta-val"><span class="badge badge-success">Successful</span></td>
+      <td class="meta-label">📊 Status:</td>
+      <td class="meta-val"><span class="badge badge-success">✓ Successful Login</span></td>
     </tr>
   </table>
 
+  <div class="divider"></div>
+
   <div class="security-notice">
-    <strong>Was this you?</strong> If you recently logged in from this device, you can safely ignore this email. If this wasn't you, your account may be compromised. Please reset your password immediately using the link below:
+    <strong>🤔 Was this you?</strong> If you recently signed in from this device, you can safely ignore this email. If this was NOT you, your account may be at risk.
   </div>
 
-  <div style="text-align: center;">
-    <a href="{{clientUrl}}/forgot-password" class="action-button" style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);">Secure Your Account</a>
-  </div>
+  <!-- Two action buttons -->
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
+    <tr>
+      <td style="text-align: center; padding: 0 6px;">
+        <a href="{{clientUrl}}/forgot-password" class="action-button" style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3);">🔒 Secure My Account</a>
+      </td>
+    </tr>
+  </table>
+
+  <p style="text-align: center; font-size: 12px; color: #94a3b8; margin-top: 8px;">
+    If this was you, no further action is required.
+  </p>
 </div>

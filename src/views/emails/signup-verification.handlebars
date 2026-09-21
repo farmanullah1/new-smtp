@@ -1,20 +1,61 @@
 <div style="text-align: left;">
   <span class="badge badge-info">Registration Verification</span>
-  <h2 style="color: #0f172a; margin: 12px 0 8px 0; font-size: 20px;">Welcome aboard, {{name}}!</h2>
-  <p style="color: #475569; margin: 0 0 16px 0;">
-    Thank you for registering with <strong>{{appName}}</strong>. To complete your account activation and verify your email address, please use the 6-digit verification code below:
+  <h2 style="color: #0f172a; margin: 14px 0 8px 0; font-size: 22px; font-weight: 800;">Welcome aboard, {{name}}! 🎉</h2>
+  <p style="color: #475569; margin: 0 0 8px 0;">
+    Thank you for creating your account with <strong>{{appName}}</strong>. You're just one step away from getting started.
+  </p>
+  <p style="color: #475569; margin: 0 0 20px 0;">
+    Please enter the 6-digit verification code below to activate your account:
   </p>
 
+  <!-- OTP Individual Digit Cells -->
   <div class="otp-code-box">
-    <p class="otp-digits">{{otpCode}}</p>
-    <p class="otp-subtext">Valid for the next {{expiryMinutes}} minutes</p>
+    <!--[if mso]>
+    <p class="otp-fallback">{{otpCode}}</p>
+    <![endif]-->
+    <!--[if !mso]><!-->
+    <div class="otp-digits-row">
+      {{#each otpDigits}}
+      <span class="otp-digit-cell">{{this}}</span>
+      {{/each}}
+    </div>
+    <!--<![endif]-->
+    <p class="otp-subtext">This code expires in <strong>{{expiryMinutes}} minutes</strong></p>
+    <span class="otp-timer-badge">⏱ Expires: {{expiryMinutes}} min</span>
   </div>
 
-  <p style="color: #475569; font-size: 14px; margin: 16px 0 0 0;">
-    Enter this code on the verification screen to activate your account.
-  </p>
+  <div class="divider"></div>
+
+  <!-- Steps -->
+  <p style="font-weight: 700; color: #1e293b; margin-bottom: 14px; font-size: 14px;">How to activate:</p>
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td style="vertical-align: top; width: 36px; padding: 0 14px 14px 0;">
+        <div class="step-number">1</div>
+      </td>
+      <td style="vertical-align: top; padding-bottom: 14px;">
+        <span class="step-text">Copy the 6-digit code shown above</span>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 36px; padding: 0 14px 14px 0;">
+        <div class="step-number">2</div>
+      </td>
+      <td style="vertical-align: top; padding-bottom: 14px;">
+        <span class="step-text">Paste it into the verification screen in your app</span>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 36px; padding: 0 14px 0 0;">
+        <div class="step-number">3</div>
+      </td>
+      <td style="vertical-align: top;">
+        <span class="step-text">Start exploring your dashboard and features!</span>
+      </td>
+    </tr>
+  </table>
 
   <div class="security-notice">
-    <strong>Security Notice:</strong> Never share this verification code with anyone. Our support team will never ask for your code. If you did not create an account, please disregard this email.
+    <strong>🔒 Security Notice:</strong> Never share this verification code with anyone. Our support team will never ask for your code. If you did not create this account, please disregard this email.
   </div>
 </div>

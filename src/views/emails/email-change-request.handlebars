@@ -1,31 +1,46 @@
 <div style="text-align: left;">
   <span class="badge badge-info">Email Change Verification</span>
-  <h2 style="color: #0f172a; margin: 12px 0 8px 0; font-size: 20px;">Confirm Your New Email Address</h2>
-  <p style="color: #475569; margin: 0 0 16px 0;">
-    Hello <strong>{{name}}</strong>, you requested to update your account email address to this address (<strong>{{newEmail}}</strong>).
+  <h2 style="color: #0f172a; margin: 14px 0 8px 0; font-size: 22px; font-weight: 800;">📧 Confirm Your New Email</h2>
+  <p style="color: #475569; margin: 0 0 20px 0;">
+    Hello <strong>{{name}}</strong>, you requested to update your account email address. Please confirm by entering the code below.
   </p>
 
-  <p style="color: #475569; margin: 0 0 12px 0;">
-    To complete the email change, enter this 6-digit confirmation code:
-  </p>
-
-  <div class="otp-code-box">
-    <p class="otp-digits">{{otpCode}}</p>
-    <p class="otp-subtext">Valid for {{expiryMinutes}} minutes</p>
-  </div>
-
-  <table class="meta-table" role="presentation">
+  <!-- Email transition visual -->
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
     <tr>
-      <td class="meta-label">Previous Email:</td>
-      <td class="meta-val">{{currentEmail}}</td>
-    </tr>
-    <tr>
-      <td class="meta-label">New Email:</td>
-      <td class="meta-val" style="color: #2563eb; font-weight: 700;">{{newEmail}}</td>
+      <td style="width: 44%; text-align: center; padding: 14px; background: #f8fafc; border-radius: 10px; border: 1px solid #e2e8f0;">
+        <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px;">Current Email</div>
+        <div style="font-size: 13px; color: #64748b; font-weight: 600; word-break: break-all;">{{currentEmail}}</div>
+      </td>
+      <td style="width: 12%; text-align: center; font-size: 22px; color: #3b82f6;">→</td>
+      <td style="width: 44%; text-align: center; padding: 14px; background: #eff6ff; border-radius: 10px; border: 2px solid #3b82f6;">
+        <div style="font-size: 11px; color: #2563eb; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 6px;">New Email</div>
+        <div style="font-size: 13px; color: #1d4ed8; font-weight: 700; word-break: break-all;">{{newEmail}}</div>
+      </td>
     </tr>
   </table>
 
+  <p style="color: #475569; margin: 0 0 12px 0; font-size: 14px;">
+    Enter this 6-digit confirmation code to complete the change:
+  </p>
+
+  <!-- OTP Individual Digit Cells -->
+  <div class="otp-code-box">
+    <!--[if mso]>
+    <p class="otp-fallback">{{otpCode}}</p>
+    <![endif]-->
+    <!--[if !mso]><!-->
+    <div class="otp-digits-row">
+      {{#each otpDigits}}
+      <span class="otp-digit-cell">{{this}}</span>
+      {{/each}}
+    </div>
+    <!--<![endif]-->
+    <p class="otp-subtext">Valid for <strong>{{expiryMinutes}} minutes</strong></p>
+    <span class="otp-timer-badge">⏱ Expires: {{expiryMinutes}} min</span>
+  </div>
+
   <div class="security-notice">
-    <strong>Notice:</strong> Once confirmed, this new email address will be used for all logins and system communications. If you did not make this request, please contact security immediately.
+    <strong>📌 Notice:</strong> Once confirmed, this new email address will be used for all logins and system communications. If you did not make this request, please contact security immediately.
   </div>
 </div>
