@@ -431,7 +431,16 @@ const resetPassword = async ({ email, code, resetToken, newPassword, ipAddress, 
 /**
  * Request to change primary email address
  */
-const requestEmailChange = async ({ user, newEmail, currentPassword, ipAddress }) => {
+const requestEmailChange = async ({ user, userId, newEmail, currentPassword, ipAddress }) => {
+  if (!user && userId) {
+    user = await User.findByPk(userId);
+  }
+  if (!user) {
+    const error = new Error('User not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
   const normalizedNewEmail = newEmail.toLowerCase().trim();
 
   if (normalizedNewEmail === user.email) {
@@ -486,7 +495,16 @@ const requestEmailChange = async ({ user, newEmail, currentPassword, ipAddress }
 /**
  * Confirm email change with OTP
  */
-const verifyEmailChange = async ({ user, code, ipAddress }) => {
+const verifyEmailChange = async ({ user, userId, code, ipAddress }) => {
+  if (!user && userId) {
+    user = await User.findByPk(userId);
+  }
+  if (!user) {
+    const error = new Error('User not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
   if (!user.pendingEmail) {
     const error = new Error('No pending email change request found');
     error.statusCode = 400;
@@ -550,6 +568,126 @@ const refreshAccessToken = async (refreshToken) => {
   }
 };
 
+/**
+ * Fetch recent login history for a user
+ */
+const getLoginHistory = async ({ userId, limit = 10 }) => {
+  const history = await LoginHistory.findAll({
+    where: { userId },
+    limit: Math.min(50, parseInt(limit, 10) || 10),
+    order: [['createdAt', 'DESC']]
+  });
+  return history.map((h) => (h.toJSON ? h.toJSON() : h));
+};
+
+/**
+ * Update personal profile fields
+ */
+const updateProfile = async ({ userId, name, phone, bio, avatarUrl }) => {
+  const user = await User.findByPk(userId);
+  if (!user) {
+    const error = new Error('User not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  await user.update({
+    name: name !== undefined ? name : user.name,
+    phone: phone !== undefined ? phone : user.phone,
+    bio: bio !== undefined ? bio : user.bio,
+    avatarUrl: avatarUrl !== undefined ? avatarUrl : user.avatarUrl
+  });
+
+  return sanitizeUser(user);
+};
+
+/**
+ * Update account password
+ */
+const updatePassword = async ({ userId, currentPassword, newPassword, ipAddress, userAgent }) => {
+  if (!currentPassword || !newPassword) {
+    const error = new Error('Both currentPassword and newPassword are required');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (newPassword.length < 6) {
+    const error = new Error('New password must be at least 6 characters long');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const user = await User.findByPk(userId);
+  if (!user) {
+    const error = new Error('User not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const isValid = await comparePassword(currentPassword, user.passwordHash);
+  if (!isValid) {
+    const error = new Error('Current password does not match');
+    error.statusCode = 401;
+    throw error;
+  }
+
+  const hashedPassword = await hashPassword(newPassword);
+  await user.update({ passwordHash: hashedPassword });
+
+  // Dispatched password changed advisory email asynchronously
+  emailService.sendPasswordChangedEmail({ user, ipAddress, userAgent }).catch((err) => {
+    console.error(`[Email Alert Error] ${err.message}`);
+  });
+
+  return { message: 'Password updated successfully' };
+};
+
+/**
+ * Toggle Two-Factor Authentication
+ */
+const toggleTwoFactor = async ({ userId, isEnabled }) => {
+  const user = await User.findByPk(userId);
+  if (!user) {
+    const error = new Error('User not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const newStatus = isEnabled !== undefined ? Boolean(isEnabled) : !user.isTwoFactorEnabled;
+  await user.update({ isTwoFactorEnabled: newStatus });
+  return { isTwoFactorEnabled: newStatus };
+};
+
+/**
+ * Permanently delete user account and send closure email
+ */
+const deleteAccount = async ({ userId, password, ipAddress }) => {
+  if (!password) {
+    const error = new Error('Password is required to confirm account deletion');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const user = await User.findByPk(userId);
+  if (!user) {
+    const error = new Error('User not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const isValid = await comparePassword(password, user.passwordHash);
+  if (!isValid) {
+    const error = new Error('Incorrect password. Account deletion aborted.');
+    error.statusCode = 401;
+    throw error;
+  }
+
+  await emailService.sendAccountDeletedEmail({ user, ipAddress });
+  await user.destroy();
+
+  return { message: 'Your account has been deleted permanently.' };
+};
+
 module.exports = {
   signup,
   verifyEmail,
@@ -562,6 +700,11 @@ module.exports = {
   requestEmailChange,
   verifyEmailChange,
   refreshAccessToken,
+  getLoginHistory,
+  updateProfile,
+  updatePassword,
+  toggleTwoFactor,
+  deleteAccount,
   sanitizeUser,
   generateTokens,
   comparePassword,

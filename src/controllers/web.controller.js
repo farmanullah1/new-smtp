@@ -1,7 +1,7 @@
 const authService = require('../services/auth.service');
 const itemService = require('../services/item.service');
 const emailService = require('../services/email.service');
-const { getSmtpStatus, sendTestEmail } = require('../config/email');
+const { getSmtpStatus } = require('../config/email');
 const { getActiveDialect } = require('../config/database');
 const { User, LoginHistory } = require('../models');
 
@@ -114,6 +114,12 @@ const postVerifyOtp = async (req, res) => {
     let result;
     if (purpose === '2fa') {
       result = await authService.verifyLogin2FA({ email, code, ipAddress, userAgent });
+    } else if (purpose === 'email_change') {
+      result = await authService.verifyEmailChange({ user: req.user, code, ipAddress });
+      if (result.tokens?.accessToken) {
+        setAuthCookie(res, result.tokens.accessToken);
+      }
+      return res.redirect(`/profile?success=${encodeURIComponent(result.message || 'Email updated successfully!')}`);
     } else {
       result = await authService.verifyEmail({ email, code });
     }
@@ -350,8 +356,15 @@ const renderDiagnostics = (req, res) => {
 const postSendTestEmail = async (req, res) => {
   const { testEmail } = req.body;
   try {
-    const result = await sendTestEmail(testEmail);
-    res.redirect(`/diagnostics?success=${encodeURIComponent(result.message || 'Diagnostic email successfully dispatched!')}`);
+    const targetEmail = testEmail || req.user?.email || process.env.SMTP_USER;
+    const result = await emailService.sendTestEmail({
+      recipientEmail: targetEmail,
+      senderEmail: process.env.SMTP_USER,
+      smtpHost: process.env.SMTP_HOST || 'smtp.gmail.com',
+      smtpPort: parseInt(process.env.SMTP_PORT, 10) || 587,
+      databaseDialect: getActiveDialect()
+    });
+    res.redirect(`/diagnostics?success=${encodeURIComponent(`Diagnostic email successfully dispatched to ${targetEmail}! Message ID: ${result.messageId || 'OK'}`)}`);
   } catch (err) {
     res.redirect(`/diagnostics?error=${encodeURIComponent(err.message || 'Failed to dispatch diagnostic email')}`);
   }
@@ -426,10 +439,13 @@ const postToggle2fa = async (req, res) => {
 const postRequestEmailChange = async (req, res) => {
   try {
     const { currentPassword, newEmail } = req.body;
+    const ipAddress = req.ip || req.connection?.remoteAddress || '127.0.0.1';
     const result = await authService.requestEmailChange({
       userId: req.user.id,
+      user: req.user,
       currentPassword,
-      newEmail
+      newEmail,
+      ipAddress
     });
     res.redirect(`/verify-otp?email=${encodeURIComponent(newEmail)}&purpose=email_change&success=${encodeURIComponent(result.message)}`);
   } catch (err) {
@@ -440,7 +456,8 @@ const postRequestEmailChange = async (req, res) => {
 const postDeleteAccount = async (req, res) => {
   try {
     const { password } = req.body;
-    await authService.deleteAccount({ userId: req.user.id, password });
+    const ipAddress = req.ip || req.connection?.remoteAddress || '127.0.0.1';
+    await authService.deleteAccount({ userId: req.user.id, password, ipAddress });
     res.clearCookie('token');
     res.redirect('/login?success=Your+account+has+been+permanently+deleted');
   } catch (err) {
