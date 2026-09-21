@@ -1,0 +1,26 @@
+<div style="text-align: left;">
+  <span class="badge badge-warning">Account Update</span>
+  <h2 style="color: #0f172a; margin: 12px 0 8px 0; font-size: 20px;">Email Address Updated</h2>
+  <p style="color: #475569; margin: 0 0 16px 0;">
+    Hello <strong>{{name}}</strong>, this is an official notice that the email address for your <strong>{{appName}}</strong> account has been changed from this address to:
+  </p>
+
+  <div style="background-color: #f1f5f9; padding: 14px; border-radius: 8px; text-align: center; font-weight: 700; color: #1e3a8a; font-size: 16px; margin: 16px 0;">
+    {{newEmail}}
+  </div>
+
+  <table class="meta-table" role="presentation">
+    <tr>
+      <td class="meta-label">Updated At:</td>
+      <td class="meta-val">{{formattedDate}}</td>
+    </tr>
+    <tr>
+      <td class="meta-label">IP Address:</td>
+      <td class="meta-val">{{ipAddress}}</td>
+    </tr>
+  </table>
+
+  <div class="security-notice" style="border-left-color: #dc2626; background-color: #fef2f2; color: #991b1b;">
+    <strong>Didn't make this change?</strong> If you did NOT authorize this email change, your account may be compromised. Please contact support immediately at security@farmanullah.com to recover your account.
+  </div>
+</div>

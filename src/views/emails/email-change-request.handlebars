@@ -1,0 +1,31 @@
+<div style="text-align: left;">
+  <span class="badge badge-info">Email Change Verification</span>
+  <h2 style="color: #0f172a; margin: 12px 0 8px 0; font-size: 20px;">Confirm Your New Email Address</h2>
+  <p style="color: #475569; margin: 0 0 16px 0;">
+    Hello <strong>{{name}}</strong>, you requested to update your account email address to this address (<strong>{{newEmail}}</strong>).
+  </p>
+
+  <p style="color: #475569; margin: 0 0 12px 0;">
+    To complete the email change, enter this 6-digit confirmation code:
+  </p>
+
+  <div class="otp-code-box">
+    <p class="otp-digits">{{otpCode}}</p>
+    <p class="otp-subtext">Valid for {{expiryMinutes}} minutes</p>
+  </div>
+
+  <table class="meta-table" role="presentation">
+    <tr>
+      <td class="meta-label">Previous Email:</td>
+      <td class="meta-val">{{currentEmail}}</td>
+    </tr>
+    <tr>
+      <td class="meta-label">New Email:</td>
+      <td class="meta-val" style="color: #2563eb; font-weight: 700;">{{newEmail}}</td>
+    </tr>
+  </table>
+
+  <div class="security-notice">
+    <strong>Notice:</strong> Once confirmed, this new email address will be used for all logins and system communications. If you did not make this request, please contact security immediately.
+  </div>
+</div>

@@ -1,0 +1,38 @@
+<div style="text-align: left;">
+  <span class="badge badge-success">Account Activated</span>
+  <h2 style="color: #0f172a; margin: 12px 0 8px 0; font-size: 20px;">Your Email is Verified!</h2>
+  <p style="color: #475569; margin: 0 0 16px 0;">
+    Hello <strong>{{name}}</strong>, your account has been successfully verified and is now fully active. We are thrilled to have you with us!
+  </p>
+
+  <table class="meta-table" role="presentation">
+    <tr>
+      <td class="meta-label">Account Name:</td>
+      <td class="meta-val">{{name}}</td>
+    </tr>
+    <tr>
+      <td class="meta-label">Primary Email:</td>
+      <td class="meta-val">{{recipientEmail}}</td>
+    </tr>
+    <tr>
+      <td class="meta-label">Account Role:</td>
+      <td class="meta-val"><span class="badge badge-info">{{role}}</span></td>
+    </tr>
+    <tr>
+      <td class="meta-label">Activated At:</td>
+      <td class="meta-val">{{formattedDate}}</td>
+    </tr>
+  </table>
+
+  <p style="color: #475569; margin: 16px 0;">
+    You can now sign in to your dashboard to manage your profile, access CRUD resources, and explore the API.
+  </p>
+
+  <div style="text-align: center;">
+    <a href="{{clientUrl}}/login" class="action-button">Go to Login &rarr;</a>
+  </div>
+
+  <div class="security-notice" style="border-left-color: #10b981; background-color: #f0fdf4; color: #166534;">
+    <strong>Tip:</strong> Keep your credentials safe and enable Two-Factor Authentication (2FA) in your profile settings for enhanced protection.
+  </div>
+</div>

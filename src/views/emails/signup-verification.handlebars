@@ -1,0 +1,20 @@
+<div style="text-align: left;">
+  <span class="badge badge-info">Registration Verification</span>
+  <h2 style="color: #0f172a; margin: 12px 0 8px 0; font-size: 20px;">Welcome aboard, {{name}}!</h2>
+  <p style="color: #475569; margin: 0 0 16px 0;">
+    Thank you for registering with <strong>{{appName}}</strong>. To complete your account activation and verify your email address, please use the 6-digit verification code below:
+  </p>
+
+  <div class="otp-code-box">
+    <p class="otp-digits">{{otpCode}}</p>
+    <p class="otp-subtext">Valid for the next {{expiryMinutes}} minutes</p>
+  </div>
+
+  <p style="color: #475569; font-size: 14px; margin: 16px 0 0 0;">
+    Enter this code on the verification screen to activate your account.
+  </p>
+
+  <div class="security-notice">
+    <strong>Security Notice:</strong> Never share this verification code with anyone. Our support team will never ask for your code. If you did not create an account, please disregard this email.
+  </div>
+</div>

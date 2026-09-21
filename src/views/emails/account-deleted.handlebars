@@ -1,0 +1,26 @@
+<div style="text-align: left;">
+  <span class="badge badge-danger">Account Closed</span>
+  <h2 style="color: #0f172a; margin: 12px 0 8px 0; font-size: 20px;">Account Successfully Deleted</h2>
+  <p style="color: #475569; margin: 0 0 16px 0;">
+    Hello <strong>{{name}}</strong>, your account associated with <strong>{{recipientEmail}}</strong> and all corresponding active sessions have been permanently closed.
+  </p>
+
+  <table class="meta-table" role="presentation">
+    <tr>
+      <td class="meta-label">Deletion Time:</td>
+      <td class="meta-val">{{formattedDate}}</td>
+    </tr>
+    <tr>
+      <td class="meta-label">Requested From IP:</td>
+      <td class="meta-val">{{ipAddress}}</td>
+    </tr>
+  </table>
+
+  <p style="color: #475569; font-size: 14px; margin: 16px 0;">
+    We're sorry to see you go! If you ever decide to return, you are always welcome to create a new account.
+  </p>
+
+  <div class="security-notice">
+    If this deletion was performed by error or without your permission, please contact customer support immediately.
+  </div>
+</div>

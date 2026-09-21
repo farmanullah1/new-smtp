@@ -1,0 +1,34 @@
+<div style="text-align: left;">
+  <span class="badge badge-success">SMTP Diagnostic Test</span>
+  <h2 style="color: #0f172a; margin: 12px 0 8px 0; font-size: 20px;">SMTP Delivery Test Passed!</h2>
+  <p style="color: #475569; margin: 0 0 16px 0;">
+    Congratulations! Your <strong>{{appName}}</strong> SMTP backend application is configured correctly and capable of delivering dynamic, HTML-formatted emails.
+  </p>
+
+  <table class="meta-table" role="presentation">
+    <tr>
+      <td class="meta-label">SMTP Host:</td>
+      <td class="meta-val">{{smtpHost}}:{{smtpPort}}</td>
+    </tr>
+    <tr>
+      <td class="meta-label">Sender Address:</td>
+      <td class="meta-val">{{senderEmail}}</td>
+    </tr>
+    <tr>
+      <td class="meta-label">Delivered To:</td>
+      <td class="meta-val" style="color: #15803d; font-weight: 700;">{{recipientEmail}}</td>
+    </tr>
+    <tr>
+      <td class="meta-label">Database Status:</td>
+      <td class="meta-val">{{databaseDialect}} (Connected)</td>
+    </tr>
+    <tr>
+      <td class="meta-label">Dispatched At:</td>
+      <td class="meta-val">{{formattedDate}}</td>
+    </tr>
+  </table>
+
+  <div class="security-notice" style="border-left-color: #2563eb; background-color: #eff6ff; color: #1e40af;">
+    <strong>System Note:</strong> Dynamic templating is running on Handlebars with inline CSS optimizations for cross-client compatibility across mobile and desktop.
+  </div>
+</div>

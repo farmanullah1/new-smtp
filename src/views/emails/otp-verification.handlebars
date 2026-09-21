@@ -1,0 +1,20 @@
+<div style="text-align: left;">
+  <span class="badge badge-info">Security Verification</span>
+  <h2 style="color: #0f172a; margin: 12px 0 8px 0; font-size: 20px;">Your One-Time Passcode (OTP)</h2>
+  <p style="color: #475569; margin: 0 0 16px 0;">
+    Hello <strong>{{name}}</strong>, you requested a security code for: <strong>{{purposeLabel}}</strong>.
+  </p>
+
+  <div class="otp-code-box">
+    <p class="otp-digits">{{otpCode}}</p>
+    <p class="otp-subtext">This code expires in {{expiryMinutes}} minutes</p>
+  </div>
+
+  <p style="color: #475569; font-size: 14px; margin: 16px 0 0 0;">
+    Please enter this 6-digit code in your application to complete your request.
+  </p>
+
+  <div class="security-notice">
+    <strong>Warning:</strong> Never disclose this code to anyone, including customer service agents. If you did not initiate this request, please change your account password immediately.
+  </div>
+</div>
