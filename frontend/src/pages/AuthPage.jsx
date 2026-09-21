@@ -19,8 +19,7 @@ export const AuthPage = () => {
   const [otpModal, setOtpModal] = useState({
     isOpen: false,
     purpose: '', // 'signup' | '2fa' | 'reset'
-    email: '',
-    debugOtp: ''
+    email: ''
   });
 
   // Forgot Password Flow State
@@ -48,8 +47,7 @@ export const AuthPage = () => {
       setOtpModal({
         isOpen: true,
         purpose: 'signup',
-        email,
-        debugOtp: res.debugOtp || ''
+        email
       });
     } catch (err) {
       toast.error(err.message);
@@ -74,8 +72,7 @@ export const AuthPage = () => {
         setOtpModal({
           isOpen: true,
           purpose: '2fa',
-          email,
-          debugOtp: res.debugOtp || ''
+          email
         });
         return;
       }
@@ -87,12 +84,11 @@ export const AuthPage = () => {
         toast.info('Please verify your email address to log in.');
         // Trigger resend and open verification modal
         try {
-          const resendRes = await resendOtp({ email });
+          await resendOtp({ email });
           setOtpModal({
             isOpen: true,
             purpose: 'signup',
-            email,
-            debugOtp: resendRes.debugOtp || ''
+            email
           });
         } catch {}
       } else {
@@ -126,11 +122,8 @@ export const AuthPage = () => {
 
   const handleOtpResend = async () => {
     try {
-      const res = await resendOtp({ email: otpModal.email });
+      await resendOtp({ email: otpModal.email });
       toast.success('Fresh verification code sent!');
-      if (res.debugOtp) {
-        setOtpModal((prev) => ({ ...prev, debugOtp: res.debugOtp }));
-      }
     } catch (err) {
       toast.error(err.message);
       throw err;
@@ -141,12 +134,9 @@ export const AuthPage = () => {
     e.preventDefault();
     try {
       setLoading(true);
-      const res = await forgotPassword({ email: forgotEmail });
+      await forgotPassword({ email: forgotEmail });
       toast.success('Password reset instructions sent to your email.');
       setResetStep(2);
-      if (res.debugOtp) {
-        toast.info(`Dev Reset OTP: ${res.debugOtp}`);
-      }
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -374,7 +364,6 @@ export const AuthPage = () => {
             : 'Enter the 2FA code dispatched to'
         }
         email={otpModal.email}
-        debugOtp={otpModal.debugOtp}
         onVerify={handleOtpVerify}
         onResend={otpModal.purpose === 'signup' ? handleOtpResend : undefined}
         onClose={() => setOtpModal({ ...otpModal, isOpen: false })}

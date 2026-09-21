@@ -30,7 +30,7 @@ export const ProfilePage = () => {
 
   // Email Change State
   const [emailChangeData, setEmailChangeData] = useState({ newEmail: '', currentPassword: '' });
-  const [emailChangeOtpModal, setEmailChangeOtpModal] = useState({ isOpen: false, debugOtp: '', newEmail: '' });
+  const [emailChangeOtpModal, setEmailChangeOtpModal] = useState({ isOpen: false, newEmail: '' });
   const [requestingEmailChange, setRequestingEmailChange] = useState(false);
 
   // Login History
@@ -123,7 +123,6 @@ export const ProfilePage = () => {
       toast.success(res.message || 'Verification code sent to new email address');
       setEmailChangeOtpModal({
         isOpen: true,
-        debugOtp: res.debugOtp || '',
         newEmail: emailChangeData.newEmail
       });
     } catch (err) {
@@ -138,7 +137,7 @@ export const ProfilePage = () => {
       const res = await verifyEmailChange({ code });
       toast.success(res.message || 'Email address successfully updated');
       updateUser(res.user);
-      setEmailChangeOtpModal({ isOpen: false, debugOtp: '', newEmail: '' });
+      setEmailChangeOtpModal({ isOpen: false, newEmail: '' });
       setEmailChangeData({ newEmail: '', currentPassword: '' });
     } catch (err) {
       toast.error(err.message || 'Verification failed');
@@ -417,9 +416,8 @@ export const ProfilePage = () => {
         title="Confirm New Email Address"
         subtitle="Please enter the 6-digit confirmation code dispatched to"
         email={emailChangeOtpModal.newEmail}
-        debugOtp={emailChangeOtpModal.debugOtp}
         onVerify={handleVerifyEmailChange}
-        onClose={() => setEmailChangeOtpModal({ isOpen: false, debugOtp: '', newEmail: '' })}
+        onClose={() => setEmailChangeOtpModal({ isOpen: false, newEmail: '' })}
       />
 
       {/* Delete Account Modal */}

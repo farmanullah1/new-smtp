@@ -60,8 +60,7 @@ const signup = async ({ name, email, password, role = 'user' }) => {
       return {
         user: sanitizeUser(existing),
         isVerified: false,
-        message: 'Account already registered but not verified. A fresh OTP has been sent to your email.',
-        debugOtp: process.env.NODE_ENV !== 'production' ? rawCode : undefined
+        message: 'Account already registered but not verified. A fresh OTP has been sent to your email.'
       };
     }
     const error = new Error('An account with this email already exists');
@@ -89,8 +88,7 @@ const signup = async ({ name, email, password, role = 'user' }) => {
   return {
     user: sanitizeUser(user),
     isVerified: false,
-    message: 'Registration successful! Please verify your email with the 6-digit OTP sent.',
-    debugOtp: process.env.NODE_ENV !== 'production' ? rawCode : undefined
+    message: 'Registration successful! Please verify your email with the 6-digit OTP sent.'
   };
 };
 
@@ -165,8 +163,7 @@ const resendVerificationOtp = async ({ email }) => {
   await emailService.sendSignupVerificationEmail({ user, otpCode: rawCode, expiryMinutes });
 
   return {
-    message: 'Verification OTP has been resent to your email address.',
-    debugOtp: process.env.NODE_ENV !== 'production' ? rawCode : undefined
+    message: 'Verification OTP has been resent to your email address.'
   };
 };
 
@@ -235,8 +232,7 @@ const login = async ({ email, password, ipAddress, userAgent }) => {
     return {
       requires2FA: true,
       email: user.email,
-      message: 'Two-factor authentication code sent to your email address.',
-      debugOtp: process.env.NODE_ENV !== 'production' ? rawCode : undefined
+      message: 'Two-factor authentication code sent to your email address.'
     };
   }
 
@@ -340,8 +336,7 @@ const forgotPassword = async ({ email, ipAddress }) => {
   });
 
   return {
-    message: 'Password reset code has been sent to your email.',
-    debugOtp: process.env.NODE_ENV !== 'production' ? rawCode : undefined
+    message: 'Password reset code has been sent to your email.'
   };
 };
 
@@ -484,8 +479,7 @@ const requestEmailChange = async ({ user, newEmail, currentPassword, ipAddress }
   });
 
   return {
-    message: `Verification code sent to ${normalizedNewEmail}. Please enter the code to confirm email change.`,
-    debugOtp: process.env.NODE_ENV !== 'production' ? rawCode : undefined
+    message: `Verification code sent to ${normalizedNewEmail}. Please enter the code to confirm email change.`
   };
 };
 

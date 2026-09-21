@@ -84,14 +84,27 @@ const runAllTests = async () => {
       password: testUser.password
     });
     assert.strictEqual(signupResult.isVerified, false, 'User must initially be unverified');
-    assert(signupResult.debugOtp, 'Debug OTP should be generated in development mode');
-    console.log(`[PASS] User created with ID: ${signupResult.user.id}, OTP: ${signupResult.debugOtp}`);
+    assert.strictEqual(signupResult.debugOtp, undefined, 'Debug OTP must NEVER be exposed in production/client response');
+    
+    // Retrieve OTP for testing from the Otp service / database
+    const signupOtpRecord = await Otp.findOne({
+      where: { email: testUser.email.toLowerCase(), isUsed: false },
+      order: [['createdAt', 'DESC']]
+    });
+    assert(signupOtpRecord, 'Active OTP record must exist in DB');
+    console.log(`[PASS] User created with ID: ${signupResult.user.id}. OTP successfully dispatched and hidden from API.`);
 
     // 5. Email Verification with OTP
     console.log('\n[Test 5] Testing Email Verification with OTP...');
+    // We test verifyOtp helper
+    const testCode = '123456';
+    // Update hash so we can verify with known code deterministically
+    const testHash = require('../src/services/otp.service').hashOtp(testCode);
+    await signupOtpRecord.update({ codeHash: testHash });
+
     const verifyResult = await authService.verifyEmail({
       email: testUser.email,
-      code: signupResult.debugOtp
+      code: testCode
     });
     assert.strictEqual(verifyResult.user.isVerified, true, 'User should now be verified');
     assert(verifyResult.tokens.accessToken, 'Access token must be returned');
@@ -171,11 +184,19 @@ const runAllTests = async () => {
       email: testUser.email,
       ipAddress: '127.0.0.1'
     });
-    assert(forgotResult.debugOtp, 'Reset OTP should be returned in development mode');
+    assert.strictEqual(forgotResult.debugOtp, undefined, 'Reset OTP must NOT be exposed in response');
+
+    const resetOtpRecord = await Otp.findOne({
+      where: { email: testUser.email.toLowerCase(), purpose: 'password_reset', isUsed: false },
+      order: [['createdAt', 'DESC']]
+    });
+    assert(resetOtpRecord, 'Reset OTP record must exist in DB');
+    const resetTestCode = '654321';
+    await resetOtpRecord.update({ codeHash: require('../src/services/otp.service').hashOtp(resetTestCode) });
 
     const verifyReset = await authService.verifyResetOtp({
       email: testUser.email,
-      code: forgotResult.debugOtp
+      code: resetTestCode
     });
     assert(verifyReset.resetToken, 'Reset token should be issued');
 
@@ -207,11 +228,19 @@ const runAllTests = async () => {
       currentPassword: testUser.newPassword,
       ipAddress: '127.0.0.1'
     });
-    assert(emailChangeReq.debugOtp, 'Email change OTP must be generated');
+    assert.strictEqual(emailChangeReq.debugOtp, undefined, 'Email change OTP must NOT be exposed');
+
+    const emailChangeOtpRecord = await Otp.findOne({
+      where: { email: testUser.newEmail.toLowerCase(), purpose: 'email_change', isUsed: false },
+      order: [['createdAt', 'DESC']]
+    });
+    assert(emailChangeOtpRecord, 'Email change OTP record must exist');
+    const emailChangeCode = '888999';
+    await emailChangeOtpRecord.update({ codeHash: require('../src/services/otp.service').hashOtp(emailChangeCode) });
 
     const emailChangeVerify = await authService.verifyEmailChange({
       user: dbUser,
-      code: emailChangeReq.debugOtp,
+      code: emailChangeCode,
       ipAddress: '127.0.0.1'
     });
     assert.strictEqual(emailChangeVerify.user.email, testUser.newEmail.toLowerCase());

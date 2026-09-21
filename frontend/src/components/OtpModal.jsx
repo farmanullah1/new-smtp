@@ -9,19 +9,21 @@ export const OtpModal = ({
   expiryMinutes = 10,
   onVerify,
   onResend,
-  onClose,
-  debugOtp
+  onClose
 }) => {
   const [digits, setDigits] = useState(['', '', '', '', '', '']);
   const [timeLeft, setTimeLeft] = useState(expiryMinutes * 60);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResending, setIsResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [errorMessage, setErrorMessage] = useState('');
   const inputRefs = useRef([]);
 
   useEffect(() => {
     if (isOpen) {
       setDigits(['', '', '', '', '', '']);
       setTimeLeft(expiryMinutes * 60);
+      setErrorMessage('');
       setTimeout(() => inputRefs.current[0]?.focus(), 150);
     }
   }, [isOpen, expiryMinutes]);
@@ -32,12 +34,21 @@ export const OtpModal = ({
     return () => clearInterval(interval);
   }, [isOpen, timeLeft]);
 
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const interval = setInterval(() => setResendCooldown((c) => Math.max(0, c - 1)), 1000);
+    return () => clearInterval(interval);
+  }, [resendCooldown]);
+
   if (!isOpen) return null;
 
   const handleChange = (index, value) => {
-    if (value.length > 1) {
-      // Handle pasting whole 6 digit code
-      const pasted = value.replace(/\D/g, '').slice(0, 6).split('');
+    setErrorMessage('');
+    const cleanVal = value.replace(/\D/g, '');
+
+    if (cleanVal.length > 1) {
+      // Pasting full 6 digits
+      const pasted = cleanVal.slice(0, 6).split('');
       const newDigits = [...digits];
       pasted.forEach((char, i) => {
         newDigits[i] = char;
@@ -48,20 +59,40 @@ export const OtpModal = ({
       return;
     }
 
-    const char = value.replace(/\D/g, '');
     const newDigits = [...digits];
-    newDigits[index] = char;
+    newDigits[index] = cleanVal;
     setDigits(newDigits);
 
-    if (char && index < 5) {
+    if (cleanVal && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
   };
 
   const handleKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !digits[index] && index > 0) {
+    if (e.key === 'Backspace') {
+      if (!digits[index] && index > 0) {
+        inputRefs.current[index - 1]?.focus();
+      }
+    } else if (e.key === 'ArrowLeft' && index > 0) {
       inputRefs.current[index - 1]?.focus();
+    } else if (e.key === 'ArrowRight' && index < 5) {
+      inputRefs.current[index + 1]?.focus();
     }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    setErrorMessage('');
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (!pastedData) return;
+
+    const newDigits = ['', '', '', '', '', ''];
+    pastedData.split('').forEach((char, i) => {
+      newDigits[i] = char;
+    });
+    setDigits(newDigits);
+    const targetIdx = Math.min(pastedData.length, 5);
+    inputRefs.current[targetIdx]?.focus();
   };
 
   const fullCode = digits.join('');
@@ -72,18 +103,27 @@ export const OtpModal = ({
 
     try {
       setIsSubmitting(true);
+      setErrorMessage('');
       await onVerify(fullCode);
+    } catch (err) {
+      setErrorMessage(err?.message || 'Verification failed. Please check the code.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleResend = async () => {
-    if (isResending || !onResend) return;
+    if (isResending || resendCooldown > 0 || !onResend) return;
     try {
       setIsResending(true);
+      setErrorMessage('');
       await onResend();
       setTimeLeft(expiryMinutes * 60);
+      setResendCooldown(30); // 30s cooldown between resend clicks
+      setDigits(['', '', '', '', '', '']);
+      inputRefs.current[0]?.focus();
+    } catch (err) {
+      setErrorMessage(err?.message || 'Failed to resend verification code');
     } finally {
       setIsResending(false);
     }
@@ -102,7 +142,7 @@ export const OtpModal = ({
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.75)',
+      backgroundColor: 'rgba(0, 0, 0, 0.78)',
       backdropFilter: 'blur(8px)',
       display: 'flex',
       alignItems: 'center',
@@ -115,11 +155,13 @@ export const OtpModal = ({
         width: '100%',
         padding: '32px',
         position: 'relative',
-        textAlign: 'center'
+        textAlign: 'center',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.1)'
       }}>
         {onClose && (
           <button
             onClick={onClose}
+            aria-label="Close modal"
             style={{
               position: 'absolute',
               top: '16px',
@@ -128,7 +170,11 @@ export const OtpModal = ({
               border: 'none',
               color: '#9ca3af',
               cursor: 'pointer',
-              padding: '4px'
+              padding: '6px',
+              borderRadius: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
           >
             <X size={20} />
@@ -139,32 +185,61 @@ export const OtpModal = ({
           width: '56px',
           height: '56px',
           borderRadius: '50%',
-          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%)',
+          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(6, 182, 212, 0.2) 100%)',
           border: '1px solid rgba(99, 102, 241, 0.4)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          margin: '0 auto 16px auto'
+          margin: '0 auto 16px auto',
+          boxShadow: '0 0 20px rgba(99, 102, 241, 0.25)'
         }}>
           <ShieldCheck size={28} color="#818cf8" />
         </div>
 
-        <h2 style={{ fontSize: '22px', marginBottom: '8px' }}>{title}</h2>
-        <p style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '20px' }}>
-          {subtitle} {email && <strong style={{ color: '#f1f5f9' }}>{email}</strong>}
+        <h2 style={{ fontSize: '22px', fontWeight: '700', marginBottom: '8px', color: '#f8fafc' }}>{title}</h2>
+        <p style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '8px', lineHeight: '1.5' }}>
+          {subtitle}
         </p>
-
-        {debugOtp && (
-          <div style={{
-            background: 'rgba(99, 102, 241, 0.1)',
-            border: '1px dashed rgba(99, 102, 241, 0.4)',
-            borderRadius: '8px',
-            padding: '8px 12px',
-            marginBottom: '16px',
-            fontSize: '12px',
-            color: '#a5b4fc'
+        {email && (
+          <p style={{
+            color: '#38bdf8',
+            fontWeight: '600',
+            fontSize: '14px',
+            marginBottom: '20px',
+            wordBreak: 'break-all'
           }}>
-            Developer Mode Code: <strong style={{ letterSpacing: '2px', color: '#ffffff' }}>{debugOtp}</strong>
+            {email}
+          </p>
+        )}
+
+        <div style={{
+          background: 'rgba(15, 23, 42, 0.6)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '8px',
+          padding: '10px 14px',
+          marginBottom: '20px',
+          fontSize: '12px',
+          color: '#94a3b8',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          textAlign: 'left'
+        }}>
+          <span style={{ fontSize: '14px' }}>🔒</span>
+          <span>We've dispatched a confidential 6-digit code. Check your inbox and spam folder.</span>
+        </div>
+
+        {errorMessage && (
+          <div style={{
+            background: 'rgba(239, 68, 68, 0.15)',
+            border: '1px solid rgba(239, 68, 68, 0.3)',
+            color: '#f87171',
+            borderRadius: '8px',
+            padding: '10px',
+            fontSize: '13px',
+            marginBottom: '16px'
+          }}>
+            {errorMessage}
           </div>
         )}
 
@@ -181,23 +256,26 @@ export const OtpModal = ({
                 ref={(el) => (inputRefs.current[i] = el)}
                 type="text"
                 inputMode="numeric"
+                autoComplete="one-time-code"
                 maxLength={6}
                 value={digit}
                 onChange={(e) => handleChange(i, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(i, e)}
+                onPaste={handlePaste}
+                aria-label={`Digit ${i + 1} of verification code`}
                 style={{
-                  width: '46px',
-                  height: '54px',
+                  width: '48px',
+                  height: '56px',
                   textAlign: 'center',
                   fontSize: '24px',
                   fontWeight: '700',
                   color: '#f8fafc',
-                  background: 'rgba(15, 23, 42, 0.8)',
+                  background: 'rgba(15, 23, 42, 0.85)',
                   border: `2px solid ${digit ? '#6366f1' : 'rgba(255, 255, 255, 0.12)'}`,
                   borderRadius: '10px',
                   outline: 'none',
                   transition: 'all 0.2s ease',
-                  boxShadow: digit ? '0 0 12px rgba(99, 102, 241, 0.3)' : 'none'
+                  boxShadow: digit ? '0 0 14px rgba(99, 102, 241, 0.35)' : 'none'
                 }}
               />
             ))}
@@ -216,19 +294,20 @@ export const OtpModal = ({
               <button
                 type="button"
                 onClick={handleResend}
-                disabled={isResending}
+                disabled={isResending || resendCooldown > 0}
                 style={{
                   background: 'transparent',
                   border: 'none',
-                  color: '#818cf8',
-                  cursor: 'pointer',
+                  color: resendCooldown > 0 ? '#6b7280' : '#818cf8',
+                  cursor: resendCooldown > 0 ? 'not-allowed' : 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '4px',
                   fontWeight: '600'
                 }}
               >
-                <RefreshCw size={14} className={isResending ? 'spin' : ''} /> Resend
+                <RefreshCw size={14} className={isResending ? 'spin' : ''} />
+                {resendCooldown > 0 ? `Resend (${resendCooldown}s)` : 'Resend Code'}
               </button>
             )}
           </div>
