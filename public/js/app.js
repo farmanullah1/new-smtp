@@ -1,7 +1,70 @@
-// Global Application Interactive Scripts
+/**
+ * Farmanullah Company SMTP & Auth Suite
+ * Production-ready Client Interactive Engine
+ */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Mobile Menu Drawer Toggle
+  // ─── 1. Accessible Modal System ───
+  let lastFocusedElement = null;
+
+  window.openModal = function (id) {
+    const modal = document.getElementById(id);
+    if (!modal) return;
+    lastFocusedElement = document.activeElement;
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+
+    // Focus first interactive control in modal
+    const focusable = modal.querySelectorAll('input:not([type="hidden"]), select, textarea, button:not([disabled])');
+    if (focusable.length > 0) {
+      setTimeout(() => focusable[0].focus(), 50);
+    }
+  };
+
+  window.closeModal = function (id) {
+    const modal = document.getElementById(id);
+    if (!modal) return;
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+    if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+      lastFocusedElement.focus();
+    }
+  };
+
+  // Delegated click for open / close modal buttons
+  document.addEventListener('click', (e) => {
+    const openBtn = e.target.closest('.btn-open-modal');
+    if (openBtn) {
+      const modalId = openBtn.getAttribute('data-modal');
+      if (modalId) window.openModal(modalId);
+      return;
+    }
+
+    const closeBtn = e.target.closest('.btn-close-modal');
+    if (closeBtn) {
+      const modalId = closeBtn.getAttribute('data-modal') || closeBtn.closest('.modal-backdrop')?.id;
+      if (modalId) window.closeModal(modalId);
+      return;
+    }
+
+    // Click on backdrop directly dismisses modal
+    if (e.target.classList && e.target.classList.contains('modal-backdrop')) {
+      e.target.classList.remove('active');
+      e.target.setAttribute('aria-hidden', 'true');
+    }
+  });
+
+  // Escape key closes any active modal
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const activeModal = document.querySelector('.modal-backdrop.active');
+      if (activeModal) {
+        window.closeModal(activeModal.id);
+      }
+    }
+  });
+
+  // ─── 2. Mobile Menu Drawer Toggle ───
   const mobileToggleBtn = document.getElementById('mobile-menu-btn');
   const mobileDrawer = document.getElementById('mobile-menu-drawer');
   if (mobileToggleBtn && mobileDrawer) {
@@ -12,8 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 2. Password Visibility Toggle
-  document.querySelectorAll('.btn-toggle-password').forEach(btn => {
+  // ─── 3. Password Visibility Toggle ───
+  document.querySelectorAll('.btn-toggle-password').forEach((btn) => {
     btn.addEventListener('click', () => {
       const targetInputId = btn.getAttribute('data-target');
       const input = document.getElementById(targetInputId);
@@ -21,11 +84,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const isPassword = input.type === 'password';
         input.type = isPassword ? 'text' : 'password';
         btn.innerHTML = isPassword ? '👁️‍🗨️' : '👁️';
+        btn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
       }
     });
   });
 
-  // 3. Password Strength Meter
+  // ─── 4. Password Strength Meter ───
   const pwInput = document.getElementById('signup-password') || document.getElementById('new-password');
   const pwBar = document.getElementById('pw-strength-bar');
   const pwLabel = document.getElementById('pw-strength-label');
@@ -67,10 +131,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 4. OTP 6-Digit Auto-Focus and Paste
+  // ─── 5. OTP 6-Digit Auto-Focus and Paste ───
   const otpCells = document.querySelectorAll('.otp-cell');
   const otpFullHidden = document.getElementById('otp-full-code');
+  const otpForm = document.getElementById('otp-form');
+
   if (otpCells.length === 6) {
+    const updateFullOtp = () => {
+      if (otpFullHidden) {
+        const code = Array.from(otpCells).map((c) => c.value).join('');
+        otpFullHidden.value = code;
+      }
+    };
+
     otpCells.forEach((cell, idx) => {
       cell.addEventListener('input', (e) => {
         const val = e.target.value.replace(/\D/g, '');
@@ -103,67 +176,187 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    function updateFullOtp() {
-      if (otpFullHidden) {
-        const code = Array.from(otpCells).map(c => c.value).join('');
-        otpFullHidden.value = code;
-      }
+    if (otpForm) {
+      otpForm.addEventListener('submit', (e) => {
+        updateFullOtp();
+        if (!otpFullHidden.value || otpFullHidden.value.length < 6) {
+          e.preventDefault();
+          for (let i = 0; i < otpCells.length; i++) {
+            if (!otpCells[i].value) {
+              otpCells[i].focus();
+              break;
+            }
+          }
+        }
+      });
     }
   }
 
-  // 5. Generic Modal Handlers
-  window.openModal = function(id) {
-    const modal = document.getElementById(id);
-    if (modal) modal.classList.add('active');
+  // ─── 6. Resource Item Modals (Create, Edit, Delete) ───
+  window.createItemModal = function () {
+    const titleEl = document.getElementById('item-modal-title');
+    const formEl = document.getElementById('item-form');
+    if (titleEl) titleEl.textContent = 'New Resource Item';
+    if (formEl) formEl.action = '/items/create';
+
+    const titleInput = document.getElementById('item-title');
+    const categorySelect = document.getElementById('item-category');
+    const statusSelect = document.getElementById('item-status');
+    const prioritySelect = document.getElementById('item-priority');
+    const descInput = document.getElementById('item-description');
+    const tagsInput = document.getElementById('item-tags');
+
+    if (titleInput) titleInput.value = '';
+    if (categorySelect) categorySelect.value = 'general';
+    if (statusSelect) statusSelect.value = 'active';
+    if (prioritySelect) prioritySelect.value = 'medium';
+    if (descInput) descInput.value = '';
+    if (tagsInput) tagsInput.value = '';
+
+    window.openModal('item-modal');
   };
 
-  window.closeModal = function(id) {
-    const modal = document.getElementById(id);
-    if (modal) modal.classList.remove('active');
+  window.editItemModal = function (itemData) {
+    try {
+      const item = typeof itemData === 'string' ? JSON.parse(itemData) : itemData;
+      const titleEl = document.getElementById('item-modal-title');
+      const formEl = document.getElementById('item-form');
+      if (titleEl) titleEl.textContent = 'Edit Resource Item';
+      if (formEl) formEl.action = `/items/${item.id}/update`;
+
+      const titleInput = document.getElementById('item-title');
+      const categorySelect = document.getElementById('item-category');
+      const statusSelect = document.getElementById('item-status');
+      const prioritySelect = document.getElementById('item-priority');
+      const descInput = document.getElementById('item-description');
+      const tagsInput = document.getElementById('item-tags');
+
+      if (titleInput) titleInput.value = item.title || '';
+      if (categorySelect) categorySelect.value = item.category || 'general';
+      if (statusSelect) statusSelect.value = item.status || 'active';
+      if (prioritySelect) prioritySelect.value = item.priority || 'medium';
+      if (descInput) descInput.value = item.description || '';
+      if (tagsInput) tagsInput.value = Array.isArray(item.tags) ? item.tags.join(', ') : item.tags || '';
+
+      window.openModal('item-modal');
+    } catch (err) {
+      console.error('Failed to open edit modal:', err);
+    }
   };
 
-  // Close modals on clicking backdrop
-  document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
-    backdrop.addEventListener('click', (e) => {
-      if (e.target === backdrop) {
-        backdrop.classList.remove('active');
+  window.deleteItemModal = function (id, title) {
+    const titleEl = document.getElementById('delete-item-title');
+    const formEl = document.getElementById('delete-item-form');
+    if (titleEl) titleEl.textContent = title || 'this resource';
+    if (formEl) formEl.action = `/items/${id}/delete`;
+    window.openModal('delete-modal');
+  };
+
+  // Delegated event listeners for resource buttons
+  document.addEventListener('click', (e) => {
+    // Edit item
+    const editBtn = e.target.closest('.btn-edit-item');
+    if (editBtn) {
+      const rawData = editBtn.getAttribute('data-item');
+      if (rawData) {
+        try {
+          const item = JSON.parse(decodeURIComponent(rawData));
+          window.editItemModal(item);
+        } catch (err) {
+          console.error('Error parsing item data:', err);
+        }
+      }
+      return;
+    }
+
+    // Delete item
+    const deleteBtn = e.target.closest('.btn-delete-item');
+    if (deleteBtn) {
+      const id = deleteBtn.getAttribute('data-id');
+      const title = deleteBtn.getAttribute('data-title');
+      if (id) window.deleteItemModal(id, title);
+      return;
+    }
+
+    // Create item buttons
+    if (e.target.closest('#btn-create-item') || e.target.closest('#btn-create-first-item')) {
+      window.createItemModal();
+    }
+  });
+
+  // ─── 7. Template Preview Device Switcher & URL Copy ───
+  document.querySelectorAll('.btn-device-switch').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const device = btn.getAttribute('data-device');
+      const wrapper = document.getElementById('preview-wrapper');
+      const btnDesktop = document.getElementById('btn-device-desktop');
+      const btnMobile = document.getElementById('btn-device-mobile');
+
+      if (!wrapper) return;
+
+      if (device === 'mobile') {
+        wrapper.style.maxWidth = '375px';
+        if (btnMobile) {
+          btnMobile.classList.add('btn-primary');
+          btnMobile.classList.remove('btn-secondary');
+          btnMobile.setAttribute('aria-pressed', 'true');
+        }
+        if (btnDesktop) {
+          btnDesktop.classList.add('btn-secondary');
+          btnDesktop.classList.remove('btn-primary');
+          btnDesktop.setAttribute('aria-pressed', 'false');
+        }
+      } else {
+        wrapper.style.maxWidth = '720px';
+        if (btnDesktop) {
+          btnDesktop.classList.add('btn-primary');
+          btnDesktop.classList.remove('btn-secondary');
+          btnDesktop.setAttribute('aria-pressed', 'true');
+        }
+        if (btnMobile) {
+          btnMobile.classList.add('btn-secondary');
+          btnMobile.classList.remove('btn-primary');
+          btnMobile.setAttribute('aria-pressed', 'false');
+        }
       }
     });
   });
 
-  // 6. Item Modal Editing Helper
-  window.editItemModal = function(itemJson) {
-    try {
-      const item = typeof itemJson === 'string' ? JSON.parse(itemJson) : itemJson;
-      document.getElementById('item-modal-title').textContent = 'Edit Resource Item';
-      document.getElementById('item-form').action = `/items/${item.id}/update`;
-      document.getElementById('item-title').value = item.title || '';
-      document.getElementById('item-category').value = item.category || 'general';
-      document.getElementById('item-status').value = item.status || 'active';
-      document.getElementById('item-priority').value = item.priority || 'medium';
-      document.getElementById('item-description').value = item.description || '';
-      document.getElementById('item-tags').value = (item.tags || []).join(', ');
-      window.openModal('item-modal');
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  // Copy Preview Link to Clipboard
+  const copyBtn = document.getElementById('btn-copy-preview-link');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', async () => {
+      const path = copyBtn.getAttribute('data-url');
+      const fullUrl = window.location.origin + path;
+      try {
+        await navigator.clipboard.writeText(fullUrl);
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '✅ Copied!';
+        setTimeout(() => {
+          copyBtn.innerHTML = originalText;
+        }, 2000);
+      } catch (err) {
+        console.error('Clipboard copy failed:', err);
+      }
+    });
+  }
 
-  window.createItemModal = function() {
-    document.getElementById('item-modal-title').textContent = 'New Resource Item';
-    document.getElementById('item-form').action = '/items/create';
-    document.getElementById('item-title').value = '';
-    document.getElementById('item-category').value = 'general';
-    document.getElementById('item-status').value = 'active';
-    document.getElementById('item-priority').value = 'medium';
-    document.getElementById('item-description').value = '';
-    document.getElementById('item-tags').value = '';
-    window.openModal('item-modal');
-  };
+  // ─── 8. Flash Notification Dismissal ───
+  document.querySelectorAll('.alert-dismiss-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const alert = btn.closest('.alert');
+      if (alert) {
+        alert.classList.add('fade-out');
+        setTimeout(() => alert.remove(), 300);
+      }
+    });
+  });
 
-  window.deleteItemModal = function(id, title) {
-    document.getElementById('delete-item-title').textContent = title || 'this resource';
-    document.getElementById('delete-item-form').action = `/items/${id}/delete`;
-    window.openModal('delete-modal');
-  };
+  // Auto-dismiss alerts after 6 seconds
+  setTimeout(() => {
+    document.querySelectorAll('.flash-container .alert').forEach((alert) => {
+      alert.classList.add('fade-out');
+      setTimeout(() => alert.remove(), 300);
+    });
+  }, 6000);
 });

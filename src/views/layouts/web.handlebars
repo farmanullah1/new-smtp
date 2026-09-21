@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{#if pageTitle}}{{pageTitle}} — {{/if}}Farmanullah Company SMTP & Auth Suite</title>
+  <meta name="description" content="Farmanullah Company SMTP &amp; Authentication Suite - Production-ready Handlebars SSR platform with dynamic templates, full auth lifecycle, and CRUD resource management.">
+  <title>{{#if pageTitle}}{{pageTitle}} — {{/if}}Farmanullah Company SMTP &amp; Auth Suite</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
@@ -11,107 +12,18 @@
 </head>
 <body>
   {{#if currentUser}}
-  <header class="site-header">
-    <div class="navbar-container">
-      <!-- Brand Logo -->
-      <a href="/dashboard" class="brand-logo" aria-label="Farmanullah Company Dashboard">
-        <div class="brand-icon">🛡️</div>
-        <div>
-          <div class="brand-title">Farmanullah Company</div>
-          <div class="brand-subtitle">SMTP & Auth Suite</div>
-        </div>
-      </a>
-
-      <!-- Desktop Navigation Links -->
-      <nav class="nav-links hide-mobile" role="navigation" aria-label="Main Navigation">
-        <a href="/dashboard" class="nav-item {{#if (eq activeNav 'dashboard')}}active{{/if}}">
-          <span>📊 CRUD Dashboard</span>
-        </a>
-        <a href="/templates" class="nav-item {{#if (eq activeNav 'templates')}}active{{/if}}">
-          <span>✉️ Email Templates</span>
-        </a>
-        <a href="/diagnostics" class="nav-item {{#if (eq activeNav 'diagnostics')}}active{{/if}}">
-          <span>🩺 SMTP Diagnostics</span>
-        </a>
-        <a href="/profile" class="nav-item {{#if (eq activeNav 'profile')}}active{{/if}}">
-          <span>👤 User Profile</span>
-        </a>
-      </nav>
-
-      <!-- User Controls -->
-      <div class="user-controls">
-        <a href="/profile" class="user-pill" title="View Profile">
-          <div class="user-avatar-circle">
-            {{userInitial currentUser.name}}
-          </div>
-          <div class="hide-mobile" style="text-align: left; line-height: 1.2;">
-            <div style="font-size: 13px; font-weight: 600; color: #f8fafc;">{{currentUser.name}}</div>
-            <div style="font-size: 11px; color: #38bdf8; text-transform: capitalize;">{{currentUser.role}}</div>
-          </div>
-        </a>
-
-        <a href="/logout" class="btn btn-danger btn-sm" title="Sign Out">
-          <span>Sign Out</span>
-        </a>
-
-        <!-- Mobile Hamburger Toggle -->
-        <button id="mobile-menu-btn" class="btn btn-secondary btn-sm show-mobile" aria-label="Toggle Menu" aria-expanded="false" style="padding: 8px 10px;">
-          ☰
-        </button>
-      </div>
-    </div>
-
-    <!-- Mobile Drawer Menu -->
-    <div id="mobile-menu-drawer" class="mobile-menu-drawer">
-      <a href="/dashboard" class="nav-item {{#if (eq activeNav 'dashboard')}}active{{/if}}">
-        <span>📊 CRUD Dashboard</span>
-      </a>
-      <a href="/templates" class="nav-item {{#if (eq activeNav 'templates')}}active{{/if}}">
-        <span>✉️ Email Templates</span>
-      </a>
-      <a href="/diagnostics" class="nav-item {{#if (eq activeNav 'diagnostics')}}active{{/if}}">
-        <span>🩺 SMTP Diagnostics</span>
-      </a>
-      <a href="/profile" class="nav-item {{#if (eq activeNav 'profile')}}active{{/if}}">
-        <span>👤 User Profile</span>
-      </a>
-    </div>
-  </header>
+    {{> navbar}}
+    {{> mobile-nav}}
   {{/if}}
 
-  <!-- Flash Alerts -->
-  <div style="max-width: 1280px; margin: 20px auto 0 auto; padding: 0 24px; width: 100%;">
-    {{#if successMessage}}
-      <div class="alert alert-success animate-fade-in">
-        <span>✅</span>
-        <div>{{successMessage}}</div>
-      </div>
-    {{/if}}
-
-    {{#if errorMessage}}
-      <div class="alert alert-error animate-fade-in">
-        <span>⚠️</span>
-        <div>{{errorMessage}}</div>
-      </div>
-    {{/if}}
-
-    {{#if infoMessage}}
-      <div class="alert alert-info animate-fade-in">
-        <span>ℹ️</span>
-        <div>{{infoMessage}}</div>
-      </div>
-    {{/if}}
-  </div>
+  {{> flash}}
 
   <!-- Main Body Content -->
-  <main class="page-container animate-fade-in">
+  <main class="page-container animate-fade-in" role="main">
     {{{body}}}
   </main>
 
-  <!-- Global Footer -->
-  <footer style="text-align: center; padding: 24px; color: #64748b; font-size: 12px; border-top: 1px solid rgba(255, 255, 255, 0.05); margin-top: auto;">
-    Farmanullah Ansari Company &bull; SMTP & Authentication Platform &bull; {{currentYear}}
-  </footer>
+  {{> footer}}
 
   <script src="/js/app.js"></script>
 </body>

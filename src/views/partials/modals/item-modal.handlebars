@@ -1,0 +1,63 @@
+<!-- Create & Edit Item Modal Partial -->
+<div id="item-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="item-modal-title">
+  <div class="glass-panel modal-dialog">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2 id="item-modal-title" style="font-size: 19px;">New Resource Item</h2>
+      <button type="button" class="btn-close-modal" data-modal="item-modal" aria-label="Close dialog" style="background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer;">✕</button>
+    </div>
+
+    <form id="item-form" method="POST" action="/items/create">
+      <div class="form-group">
+        <label class="form-label" for="item-title">Title</label>
+        <input id="item-title" type="text" name="title" class="form-input" placeholder="e.g. Email Delivery Worker" required>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label class="form-label" for="item-category">Category</label>
+          <select id="item-category" name="category" class="form-select">
+            <option value="general">General</option>
+            <option value="smtp">SMTP</option>
+            <option value="auth">Auth</option>
+            <option value="database">Database</option>
+            <option value="api">API</option>
+            <option value="infrastructure">Infrastructure</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="item-status">Status</label>
+          <select id="item-status" name="status" class="form-select">
+            <option value="active">Active</option>
+            <option value="draft">Draft</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="item-priority">Priority</label>
+          <select id="item-priority" name="priority" class="form-select">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="item-description">Description</label>
+        <textarea id="item-description" name="description" class="form-input" rows="3" placeholder="Resource details, responsibilities, or technical notes..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="item-tags">Tags (comma-separated)</label>
+        <input id="item-tags" type="text" name="tags" class="form-input" placeholder="e.g. nodemailer, tls, worker">
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-top: 24px;">
+        <button type="button" class="btn btn-secondary btn-close-modal" data-modal="item-modal" style="flex: 1;">Cancel</button>
+        <button type="submit" class="btn btn-primary" style="flex: 1;">Save Resource</button>
+      </div>
+    </form>
+  </div>
+</div>

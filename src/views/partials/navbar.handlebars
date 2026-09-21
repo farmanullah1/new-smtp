@@ -1,0 +1,51 @@
+<!-- Site Navigation Bar -->
+<header class="site-header">
+  <div class="navbar-container">
+    <!-- Brand Logo -->
+    <a href="/dashboard" class="brand-logo" aria-label="Farmanullah Company Dashboard">
+      <div class="brand-icon">🛡️</div>
+      <div>
+        <div class="brand-title">Farmanullah Company</div>
+        <div class="brand-subtitle">SMTP & Auth Suite</div>
+      </div>
+    </a>
+
+    <!-- Desktop Navigation Links -->
+    <nav class="nav-links hide-mobile" role="navigation" aria-label="Main Navigation">
+      <a href="/dashboard" class="nav-item {{#if (eq activeNav 'dashboard')}}active{{/if}}">
+        <span>📊 CRUD Dashboard</span>
+      </a>
+      <a href="/templates" class="nav-item {{#if (eq activeNav 'templates')}}active{{/if}}">
+        <span>✉️ Email Templates</span>
+      </a>
+      <a href="/diagnostics" class="nav-item {{#if (eq activeNav 'diagnostics')}}active{{/if}}">
+        <span>🩺 SMTP Diagnostics</span>
+      </a>
+      <a href="/profile" class="nav-item {{#if (eq activeNav 'profile')}}active{{/if}}">
+        <span>👤 User Profile</span>
+      </a>
+    </nav>
+
+    <!-- User Controls -->
+    <div class="user-controls">
+      <a href="/profile" class="user-pill" title="View Profile">
+        <div class="user-avatar-circle">
+          {{userInitial currentUser.name}}
+        </div>
+        <div class="hide-mobile" style="text-align: left; line-height: 1.2;">
+          <div style="font-size: 13px; font-weight: 600; color: #f8fafc;">{{currentUser.name}}</div>
+          <div style="font-size: 11px; color: #38bdf8; text-transform: capitalize;">{{currentUser.role}}</div>
+        </div>
+      </a>
+
+      <a href="/logout" class="btn btn-danger btn-sm" title="Sign Out">
+        <span>Sign Out</span>
+      </a>
+
+      <!-- Mobile Hamburger Toggle -->
+      <button id="mobile-menu-btn" class="btn btn-secondary btn-sm show-mobile" aria-label="Toggle Navigation Menu" aria-expanded="false" style="padding: 8px 10px;">
+        ☰
+      </button>
+    </div>
+  </div>
+</header>

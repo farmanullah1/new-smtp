@@ -1,0 +1,28 @@
+<!-- Reusable Pagination Partial -->
+{{#if (gt pagination.totalPages 1)}}
+  <nav class="pagination-container" role="navigation" aria-label="Pagination Navigation" style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 32px; flex-wrap: wrap;">
+    {{#if (gt pagination.currentPage 1)}}
+      <a href="/dashboard?page={{subtract pagination.currentPage 1}}&q={{encodeUri query.q}}&status={{encodeUri query.status}}&category={{encodeUri query.category}}&sort={{encodeUri query.sort}}" class="btn btn-secondary btn-sm" aria-label="Go to previous page">
+        &larr; Previous
+      </a>
+    {{else}}
+      <button type="button" class="btn btn-secondary btn-sm" disabled style="opacity: 0.5; cursor: not-allowed;">
+        &larr; Previous
+      </button>
+    {{/if}}
+
+    <span style="color: #94a3b8; font-size: 13px;">
+      Page <strong style="color: #f8fafc;">{{pagination.currentPage}}</strong> of {{pagination.totalPages}} ({{pagination.totalItems}} total)
+    </span>
+
+    {{#if (lt pagination.currentPage pagination.totalPages)}}
+      <a href="/dashboard?page={{add pagination.currentPage 1}}&q={{encodeUri query.q}}&status={{encodeUri query.status}}&category={{encodeUri query.category}}&sort={{encodeUri query.sort}}" class="btn btn-secondary btn-sm" aria-label="Go to next page">
+        Next &rarr;
+      </a>
+    {{else}}
+      <button type="button" class="btn btn-secondary btn-sm" disabled style="opacity: 0.5; cursor: not-allowed;">
+        Next &rarr;
+      </button>
+    {{/if}}
+  </nav>
+{{/if}}

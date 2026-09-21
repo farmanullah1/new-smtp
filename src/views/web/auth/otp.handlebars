@@ -9,33 +9,39 @@
       {{subtitle}} <strong style="color: #38bdf8;">{{email}}</strong>
     </p>
 
-    <form action="/verify-otp" method="POST">
+    <form id="otp-form" action="/verify-otp" method="POST">
       <input type="hidden" name="email" value="{{email}}">
       <input type="hidden" name="purpose" value="{{purpose}}">
       <input type="hidden" id="otp-full-code" name="code" value="">
 
-      <div class="otp-cells-container">
-        <input type="text" class="otp-cell" maxlength="1" pattern="\d*" inputmode="numeric" autofocus required>
-        <input type="text" class="otp-cell" maxlength="1" pattern="\d*" inputmode="numeric" required>
-        <input type="text" class="otp-cell" maxlength="1" pattern="\d*" inputmode="numeric" required>
-        <input type="text" class="otp-cell" maxlength="1" pattern="\d*" inputmode="numeric" required>
-        <input type="text" class="otp-cell" maxlength="1" pattern="\d*" inputmode="numeric" required>
-        <input type="text" class="otp-cell" maxlength="1" pattern="\d*" inputmode="numeric" required>
+      <div class="otp-cells-container" role="group" aria-label="6-Digit Verification Code">
+        <input type="text" class="otp-cell" maxlength="1" pattern="\d*" inputmode="numeric" autofocus required aria-label="Digit 1 of 6">
+        <input type="text" class="otp-cell" maxlength="1" pattern="\d*" inputmode="numeric" required aria-label="Digit 2 of 6">
+        <input type="text" class="otp-cell" maxlength="1" pattern="\d*" inputmode="numeric" required aria-label="Digit 3 of 6">
+        <input type="text" class="otp-cell" maxlength="1" pattern="\d*" inputmode="numeric" required aria-label="Digit 4 of 6">
+        <input type="text" class="otp-cell" maxlength="1" pattern="\d*" inputmode="numeric" required aria-label="Digit 5 of 6">
+        <input type="text" class="otp-cell" maxlength="1" pattern="\d*" inputmode="numeric" required aria-label="Digit 6 of 6">
       </div>
 
-      <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px;">
-        Verify & Continue &rarr;
+      <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 14px;">
+        Verify &amp; Continue &rarr;
       </button>
     </form>
 
-    <div style="margin-top: 24px; font-size: 13px; color: #64748b;">
-      Didn't receive code?
-      <form action="/resend-otp" method="POST" style="display: inline;">
-        <input type="hidden" name="email" value="{{email}}">
-        <button type="submit" style="background: none; border: none; color: #818cf8; cursor: pointer; font-weight: 600; text-decoration: underline;">
-          Resend code
-        </button>
-      </form>
+    <div style="margin-top: 24px; font-size: 13px; color: #64748b; display: flex; flex-direction: column; gap: 8px;">
+      <div>
+        Didn't receive code?
+        <form action="/resend-otp" method="POST" style="display: inline;">
+          <input type="hidden" name="email" value="{{email}}">
+          <button type="submit" style="background: none; border: none; color: #818cf8; cursor: pointer; font-weight: 600; text-decoration: underline;">
+            Resend code
+          </button>
+        </form>
+      </div>
+
+      <div>
+        <a href="/login" style="font-size: 12px; color: #64748b; text-decoration: none;">&larr; Back to Sign In</a>
+      </div>
     </div>
   </div>
 </div>

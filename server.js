@@ -12,6 +12,7 @@ const { initDatabase, getActiveDialect, closeDatabase } = require('./src/config/
 const { verifyEmailTransporter, getSmtpStatus } = require('./src/config/email');
 const apiRoutes = require('./src/routes');
 const webRoutes = require('./src/routes/web.routes');
+const handlebarsHelpers = require('./src/config/handlebarsHelpers');
 const { notFoundHandler, errorHandler } = require('./src/middlewares/error.middleware');
 
 const app = express();
@@ -23,17 +24,7 @@ app.engine('handlebars', engine({
   defaultLayout: 'web',
   layoutsDir: path.join(__dirname, 'src/views/layouts'),
   partialsDir: path.join(__dirname, 'src/views/partials'),
-  helpers: {
-    eq: (a, b) => a === b,
-    gt: (a, b) => a > b,
-    lt: (a, b) => a < b,
-    add: (a, b) => Number(a) + Number(b),
-    subtract: (a, b) => Number(a) - Number(b),
-    json: (obj) => JSON.stringify(obj),
-    formatDate: (d) => (d ? new Date(d).toLocaleDateString() : ''),
-    userInitial: (name) => (name ? name[0].toUpperCase() : 'U'),
-    currentYear: () => new Date().getFullYear()
-  }
+  helpers: handlebarsHelpers
 }));
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'src/views/web'));

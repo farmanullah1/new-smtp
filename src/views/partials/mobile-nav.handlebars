@@ -1,0 +1,20 @@
+<!-- Mobile Navigation Drawer -->
+<div id="mobile-menu-drawer" class="mobile-menu-drawer" role="navigation" aria-label="Mobile Navigation">
+  <a href="/dashboard" class="nav-item {{#if (eq activeNav 'dashboard')}}active{{/if}}">
+    <span>📊 CRUD Dashboard</span>
+  </a>
+  <a href="/templates" class="nav-item {{#if (eq activeNav 'templates')}}active{{/if}}">
+    <span>✉️ Email Templates</span>
+  </a>
+  <a href="/diagnostics" class="nav-item {{#if (eq activeNav 'diagnostics')}}active{{/if}}">
+    <span>🩺 SMTP Diagnostics</span>
+  </a>
+  <a href="/profile" class="nav-item {{#if (eq activeNav 'profile')}}active{{/if}}">
+    <span>👤 User Profile</span>
+  </a>
+  <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+    <a href="/logout" class="btn btn-danger btn-sm" style="width: 100%; text-align: center;">
+      <span>Sign Out</span>
+    </a>
+  </div>
+</div>

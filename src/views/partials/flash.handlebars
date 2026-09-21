@@ -1,0 +1,26 @@
+<!-- Flash Notification Alerts Banner -->
+<div class="flash-container" style="max-width: 1280px; margin: 20px auto 0 auto; padding: 0 24px; width: 100%;">
+  {{#if successMessage}}
+    <div class="alert alert-success animate-fade-in" role="alert" aria-live="polite">
+      <span class="alert-icon">✅</span>
+      <div class="alert-content">{{successMessage}}</div>
+      <button type="button" class="alert-dismiss-btn" aria-label="Dismiss alert">&times;</button>
+    </div>
+  {{/if}}
+
+  {{#if errorMessage}}
+    <div class="alert alert-error animate-fade-in" role="alert" aria-live="assertive">
+      <span class="alert-icon">⚠️</span>
+      <div class="alert-content">{{errorMessage}}</div>
+      <button type="button" class="alert-dismiss-btn" aria-label="Dismiss alert">&times;</button>
+    </div>
+  {{/if}}
+
+  {{#if infoMessage}}
+    <div class="alert alert-info animate-fade-in" role="alert" aria-live="polite">
+      <span class="alert-icon">ℹ️</span>
+      <div class="alert-content">{{infoMessage}}</div>
+      <button type="button" class="alert-dismiss-btn" aria-label="Dismiss alert">&times;</button>
+    </div>
+  {{/if}}
+</div>
