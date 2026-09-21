@@ -1,13 +1,29 @@
 import React, { useState } from 'react';
-import { Mail, Lock, User, Shield, ArrowRight, KeyRound, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, User, Shield, ArrowRight, KeyRound, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { signup, login, verifyEmail, resendOtp, verifyLogin2FA, forgotPassword, verifyResetOtp, resetPassword } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/Toast';
 import { OtpModal } from '../components/OtpModal';
 
+const calculatePasswordStrength = (pass) => {
+  if (!pass) return { score: 0, label: '', color: '' };
+  let score = 0;
+  if (pass.length >= 8) score += 1;
+  if (/[a-z]/.test(pass) && /[A-Z]/.test(pass)) score += 1;
+  if (/\d/.test(pass)) score += 1;
+  if (/[^a-zA-Z0-9]/.test(pass)) score += 1;
+
+  if (score <= 1) return { score: 1, label: 'Weak', color: '#f43f5e' };
+  if (score === 2) return { score: 2, label: 'Fair', color: '#f59e0b' };
+  if (score === 3) return { score: 3, label: 'Good', color: '#38bdf8' };
+  return { score: 4, label: 'Strong', color: '#10b981' };
+};
+
 export const AuthPage = () => {
   const [isLoginView, setIsLoginView] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
 
   // Form fields
   const [name, setName] = useState('');
@@ -32,6 +48,9 @@ export const AuthPage = () => {
 
   const { login: authLogin } = useAuth();
   const toast = useToast();
+
+  const pwStrength = calculatePasswordStrength(password);
+  const resetPwStrength = calculatePasswordStrength(newPassword);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -82,7 +101,6 @@ export const AuthPage = () => {
     } catch (err) {
       if (err.requiresEmailVerification) {
         toast.info('Please verify your email address to log in.');
-        // Trigger resend and open verification modal
         try {
           await resendOtp({ email });
           setOtpModal({
@@ -168,34 +186,42 @@ export const AuthPage = () => {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '40px 20px',
-      position: 'relative'
-    }}>
-      <div className="glass-panel" style={{
-        maxWidth: '460px',
-        width: '100%',
-        padding: '36px',
-        position: 'relative',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)'
-      }}>
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '40px 20px',
+        position: 'relative'
+      }}
+    >
+      <div
+        className="glass-panel"
+        style={{
+          maxWidth: '460px',
+          width: '100%',
+          padding: '36px',
+          position: 'relative',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
+          animation: 'fadeIn 0.3s ease-out'
+        }}
+      >
         {/* Brand Header */}
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <div style={{
-            width: '54px',
-            height: '54px',
-            borderRadius: '14px',
-            background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 16px auto',
-            boxShadow: '0 0 20px rgba(99, 102, 241, 0.5)'
-          }}>
+          <div
+            style={{
+              width: '54px',
+              height: '54px',
+              borderRadius: '14px',
+              background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px auto',
+              boxShadow: '0 0 20px rgba(99, 102, 241, 0.5)'
+            }}
+          >
             <Shield size={30} color="#ffffff" />
           </div>
           <h1 style={{ fontSize: '24px', marginBottom: '6px' }}>
@@ -209,17 +235,22 @@ export const AuthPage = () => {
         </div>
 
         {/* View Switcher Tabs */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          background: 'rgba(15, 23, 42, 0.7)',
-          padding: '4px',
-          borderRadius: '10px',
-          marginBottom: '24px',
-          border: '1px solid rgba(255, 255, 255, 0.06)'
-        }}>
+        <div
+          role="tablist"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            background: 'rgba(15, 23, 42, 0.7)',
+            padding: '4px',
+            borderRadius: '10px',
+            marginBottom: '24px',
+            border: '1px solid rgba(255, 255, 255, 0.06)'
+          }}
+        >
           <button
             type="button"
+            role="tab"
+            aria-selected={isLoginView}
             onClick={() => setIsLoginView(true)}
             style={{
               padding: '8px',
@@ -230,13 +261,15 @@ export const AuthPage = () => {
               fontWeight: '600',
               fontSize: '13px',
               cursor: 'pointer',
-              transition: 'all 0.2s'
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
             Sign In
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={!isLoginView}
             onClick={() => setIsLoginView(false)}
             style={{
               padding: '8px',
@@ -247,7 +280,7 @@ export const AuthPage = () => {
               fontWeight: '600',
               fontSize: '13px',
               cursor: 'pointer',
-              transition: 'all 0.2s'
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
             Sign Up
@@ -259,10 +292,11 @@ export const AuthPage = () => {
           {!isLoginView && (
             <>
               <div className="form-group">
-                <label className="form-label">Full Name</label>
+                <label className="form-label" htmlFor="auth-name">Full Name</label>
                 <div style={{ position: 'relative' }}>
                   <User size={18} style={{ position: 'absolute', left: '12px', top: '12px', color: '#64748b' }} />
                   <input
+                    id="auth-name"
                     type="text"
                     className="form-input"
                     placeholder="Farmanullah Ansari"
@@ -275,8 +309,9 @@ export const AuthPage = () => {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Account Role</label>
+                <label className="form-label" htmlFor="auth-role">Account Role</label>
                 <select
+                  id="auth-role"
                   className="form-select"
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
@@ -290,10 +325,11 @@ export const AuthPage = () => {
           )}
 
           <div className="form-group">
-            <label className="form-label">Email Address</label>
+            <label className="form-label" htmlFor="auth-email">Email Address</label>
             <div style={{ position: 'relative' }}>
               <Mail size={18} style={{ position: 'absolute', left: '12px', top: '12px', color: '#64748b' }} />
               <input
+                id="auth-email"
                 type="email"
                 className="form-input"
                 placeholder="name@example.com"
@@ -307,7 +343,7 @@ export const AuthPage = () => {
 
           <div className="form-group">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <label className="form-label" style={{ margin: 0 }}>Password</label>
+              <label className="form-label" htmlFor="auth-password" style={{ margin: 0 }}>Password</label>
               {isLoginView && (
                 <button
                   type="button"
@@ -330,16 +366,61 @@ export const AuthPage = () => {
             <div style={{ position: 'relative' }}>
               <Lock size={18} style={{ position: 'absolute', left: '12px', top: '12px', color: '#64748b' }} />
               <input
-                type="password"
+                id="auth-password"
+                type={showPassword ? 'text' : 'password'}
                 className="form-input"
                 placeholder="••••••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                style={{ paddingLeft: '38px' }}
+                style={{ paddingLeft: '38px', paddingRight: '40px' }}
                 required
                 minLength={6}
               />
+              <button
+                type="button"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '11px',
+                  background: 'none',
+                  border: 'none',
+                  color: '#64748b',
+                  cursor: 'pointer',
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
+
+            {/* Password Strength Indicator for Signup */}
+            {!isLoginView && password.length > 0 && (
+              <div style={{ marginTop: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                  <span style={{ fontSize: '11px', color: '#94a3b8' }}>Password strength</span>
+                  <span style={{ fontSize: '11px', fontWeight: '700', color: pwStrength.color }}>
+                    {pwStrength.label}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: '4px', height: '4px' }}>
+                  {[1, 2, 3, 4].map((step) => (
+                    <div
+                      key={step}
+                      style={{
+                        flex: 1,
+                        borderRadius: '2px',
+                        backgroundColor: step <= pwStrength.score ? pwStrength.color : 'rgba(255, 255, 255, 0.1)',
+                        transition: 'background-color 0.3s ease'
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <button
@@ -371,48 +452,75 @@ export const AuthPage = () => {
 
       {/* Forgot Password Modal */}
       {showForgotModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.75)',
-          backdropFilter: 'blur(8px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '20px'
-        }}>
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '20px'
+          }}
+        >
           <div className="glass-panel" style={{ maxWidth: '440px', width: '100%', padding: '28px' }}>
             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-              <div style={{
-                width: '48px',
-                height: '48px',
-                borderRadius: '50%',
-                background: 'rgba(99, 102, 241, 0.2)',
-                border: '1px solid rgba(99, 102, 241, 0.4)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 12px auto'
-              }}>
+              <div
+                style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '50%',
+                  background: 'rgba(99, 102, 241, 0.2)',
+                  border: '1px solid rgba(99, 102, 241, 0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 12px auto'
+                }}
+              >
                 <KeyRound size={24} color="#818cf8" />
               </div>
               <h2 style={{ fontSize: '20px' }}>Recover Password</h2>
-              <p style={{ color: '#9ca3af', fontSize: '13px' }}>
+              <p style={{ color: '#9ca3af', fontSize: '13px', marginTop: '4px' }}>
                 {resetStep === 1
-                  ? 'Enter your registered email to receive a password recovery OTP code.'
-                  : 'Enter the 6-digit code from your email and set your new password.'}
+                  ? 'Step 1 of 2: Enter your email to receive a recovery code.'
+                  : 'Step 2 of 2: Enter code & set your new password.'}
               </p>
+            </div>
+
+            {/* Step Indicators */}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
+              <div
+                style={{
+                  flex: 1,
+                  height: '4px',
+                  borderRadius: '2px',
+                  background: resetStep >= 1 ? 'var(--accent-primary)' : 'rgba(255,255,255,0.1)'
+                }}
+              />
+              <div
+                style={{
+                  flex: 1,
+                  height: '4px',
+                  borderRadius: '2px',
+                  background: resetStep >= 2 ? 'var(--accent-primary)' : 'rgba(255,255,255,0.1)'
+                }}
+              />
             </div>
 
             {resetStep === 1 ? (
               <form onSubmit={handleForgotPasswordSubmit}>
                 <div className="form-group">
-                  <label className="form-label">Account Email</label>
+                  <label className="form-label" htmlFor="forgot-email">Account Email</label>
                   <input
+                    id="forgot-email"
                     type="email"
                     className="form-input"
                     value={forgotEmail}
@@ -442,8 +550,9 @@ export const AuthPage = () => {
             ) : (
               <form onSubmit={handleResetPasswordSubmit}>
                 <div className="form-group">
-                  <label className="form-label">6-Digit Reset Code</label>
+                  <label className="form-label" htmlFor="reset-code">6-Digit Reset Code</label>
                   <input
+                    id="reset-code"
                     type="text"
                     className="form-input"
                     placeholder="123456"
@@ -454,16 +563,62 @@ export const AuthPage = () => {
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">New Password</label>
-                  <input
-                    type="password"
-                    className="form-input"
-                    placeholder="••••••••••••"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    minLength={6}
-                    required
-                  />
+                  <label className="form-label" htmlFor="reset-password">New Password</label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      id="reset-password"
+                      type={showResetPassword ? 'text' : 'password'}
+                      className="form-input"
+                      placeholder="••••••••••••"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      minLength={6}
+                      style={{ paddingRight: '40px' }}
+                      required
+                    />
+                    <button
+                      type="button"
+                      aria-label={showResetPassword ? 'Hide password' : 'Show password'}
+                      onClick={() => setShowResetPassword(!showResetPassword)}
+                      style={{
+                        position: 'absolute',
+                        right: '12px',
+                        top: '11px',
+                        background: 'none',
+                        border: 'none',
+                        color: '#64748b',
+                        cursor: 'pointer',
+                        padding: 0,
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}
+                    >
+                      {showResetPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                  {newPassword.length > 0 && (
+                    <div style={{ marginTop: '8px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                        <span style={{ fontSize: '11px', color: '#94a3b8' }}>Password strength</span>
+                        <span style={{ fontSize: '11px', fontWeight: '700', color: resetPwStrength.color }}>
+                          {resetPwStrength.label}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '4px', height: '4px' }}>
+                        {[1, 2, 3, 4].map((step) => (
+                          <div
+                            key={step}
+                            style={{
+                              flex: 1,
+                              borderRadius: '2px',
+                              backgroundColor: step <= resetPwStrength.score ? resetPwStrength.color : 'rgba(255, 255, 255, 0.1)',
+                              transition: 'background-color 0.3s ease'
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
                   <button

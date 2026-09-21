@@ -1,11 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { User, Shield, Lock, Mail, AlertTriangle, KeyRound, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { User, Shield, Lock, Mail, AlertTriangle, KeyRound, Clock, CheckCircle2, XCircle, Phone, Calendar, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { updateProfile, updatePassword, toggleTwoFactor, getLoginHistory, deleteAccount } from '../api/user';
 import { requestEmailChange, verifyEmailChange } from '../api/auth';
 import { useToast } from '../components/Toast';
 import { OtpModal } from '../components/OtpModal';
-import { ConfirmModal } from '../components/ConfirmModal';
+
+const formatRelativeTime = (dateStr) => {
+  if (!dateStr) return 'Never';
+  const now = new Date();
+  const date = new Date(dateStr);
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString();
+};
 
 export const ProfilePage = () => {
   const { user, updateUser, logout } = useAuth();
@@ -58,7 +73,7 @@ export const ProfilePage = () => {
     const fetchHistory = async () => {
       try {
         setLoadingHistory(true);
-        const res = await getLoginHistory(5);
+        const res = await getLoginHistory(6);
         setHistory(res.history || []);
       } catch {
       } finally {
@@ -100,10 +115,10 @@ export const ProfilePage = () => {
     }
   };
 
-  const handleToggle2FA = async () => {
+  const handleToggle2FA = async (e) => {
+    const newStatus = e.target.checked;
     try {
       setToggling2FA(true);
-      const newStatus = !is2FA;
       await toggleTwoFactor(newStatus);
       setIs2FA(newStatus);
       updateUser({ isTwoFactorEnabled: newStatus });
@@ -163,11 +178,93 @@ export const ProfilePage = () => {
 
   return (
     <div style={{ maxWidth: '1080px', margin: '0 auto', padding: '32px 24px' }}>
-      <div style={{ marginBottom: '28px' }}>
-        <h1 style={{ fontSize: '28px', marginBottom: '4px' }}>User Account & Security</h1>
-        <p style={{ color: '#94a3b8', fontSize: '14px' }}>
-          Manage your personal profile, security credentials, 2FA, and authentication audit logs
-        </p>
+      {/* User Hero Banner */}
+      <div
+        className="glass-panel"
+        style={{
+          padding: '28px',
+          marginBottom: '28px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '20px'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          {profileData.avatarUrl ? (
+            <img
+              src={profileData.avatarUrl}
+              alt={user?.name || 'User Avatar'}
+              style={{
+                width: '72px',
+                height: '72px',
+                borderRadius: '50%',
+                objectFit: 'cover',
+                border: '2px solid var(--accent-primary)',
+                boxShadow: '0 0 16px rgba(99, 102, 241, 0.4)'
+              }}
+              onError={(e) => {
+                e.target.style.display = 'none';
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: '72px',
+                height: '72px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '28px',
+                fontWeight: '800',
+                color: '#ffffff',
+                boxShadow: '0 0 20px rgba(99, 102, 241, 0.4)'
+              }}
+            >
+              {user?.name ? user.name[0].toUpperCase() : 'U'}
+            </div>
+          )}
+
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <h1 style={{ fontSize: '24px', margin: 0 }}>{user?.name || 'User'}</h1>
+              <span className="badge badge-info">{user?.role || 'user'}</span>
+              {user?.isVerified && (
+                <span className="badge badge-success">
+                  <CheckCircle2 size={11} /> Verified
+                </span>
+              )}
+            </div>
+            <p style={{ color: '#94a3b8', fontSize: '14px', marginTop: '4px' }}>
+              {user?.email}
+            </p>
+            {user?.lastLoginAt && (
+              <p style={{ color: '#64748b', fontSize: '12px', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Clock size={12} /> Last active: {formatRelativeTime(user.lastLoginAt)}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <div
+            style={{
+              padding: '8px 14px',
+              borderRadius: '8px',
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              textAlign: 'center'
+            }}
+          >
+            <div style={{ fontSize: '11px', color: '#94a3b8' }}>2FA Security</div>
+            <div style={{ fontSize: '13px', fontWeight: '700', color: is2FA ? '#34d399' : '#9ca3af' }}>
+              {is2FA ? 'Protected' : 'Disabled'}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
@@ -179,8 +276,9 @@ export const ProfilePage = () => {
 
           <form onSubmit={handleUpdateProfile}>
             <div className="form-group">
-              <label className="form-label">Full Name</label>
+              <label className="form-label" htmlFor="profile-name">Full Name</label>
               <input
+                id="profile-name"
                 type="text"
                 className="form-input"
                 value={profileData.name}
@@ -190,8 +288,9 @@ export const ProfilePage = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Phone Number</label>
+              <label className="form-label" htmlFor="profile-phone">Phone Number</label>
               <input
+                id="profile-phone"
                 type="text"
                 className="form-input"
                 placeholder="+1 555-0199"
@@ -201,19 +300,21 @@ export const ProfilePage = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Avatar URL</label>
+              <label className="form-label" htmlFor="profile-avatar">Avatar Image URL</label>
               <input
+                id="profile-avatar"
                 type="url"
                 className="form-input"
-                placeholder="https://ik.imagekit.io/frmn/avatar.png"
+                placeholder="https://images.unsplash.com/..."
                 value={profileData.avatarUrl}
                 onChange={(e) => setProfileData({ ...profileData, avatarUrl: e.target.value })}
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Bio</label>
+              <label className="form-label" htmlFor="profile-bio">Bio</label>
               <textarea
+                id="profile-bio"
                 className="form-textarea"
                 placeholder="Brief summary about yourself..."
                 value={profileData.bio}
@@ -233,40 +334,45 @@ export const ProfilePage = () => {
             <Lock size={20} color="#818cf8" /> Security & Password
           </h2>
 
-          {/* 2FA Toggle */}
-          <div style={{
-            background: 'rgba(15, 23, 42, 0.6)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            borderRadius: '10px',
-            padding: '16px',
-            marginBottom: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}>
+          {/* 2FA Toggle Switch */}
+          <div
+            style={{
+              background: 'rgba(15, 23, 42, 0.6)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: '10px',
+              padding: '16px',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '12px'
+            }}
+          >
             <div>
               <div style={{ fontWeight: '600', fontSize: '14px', color: '#f8fafc', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Shield size={16} color="#38bdf8" /> Two-Factor Authentication
               </div>
               <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
-                Requires a 6-digit email OTP on every login attempt
+                Requires 6-digit email OTP on each sign-in
               </div>
             </div>
-            <button
-              type="button"
-              onClick={handleToggle2FA}
-              disabled={toggling2FA}
-              className={`btn btn-sm ${is2FA ? 'btn-danger' : 'btn-primary'}`}
-            >
-              {is2FA ? 'Disable 2FA' : 'Enable 2FA'}
-            </button>
+            <label className="toggle-switch" aria-label="Toggle Two-Factor Authentication">
+              <input
+                type="checkbox"
+                checked={is2FA}
+                disabled={toggling2FA}
+                onChange={handleToggle2FA}
+              />
+              <span className="toggle-slider" />
+            </label>
           </div>
 
           {/* Change Password Form */}
           <form onSubmit={handleChangePassword}>
             <div className="form-group">
-              <label className="form-label">Current Password</label>
+              <label className="form-label" htmlFor="current-pw">Current Password</label>
               <input
+                id="current-pw"
                 type="password"
                 className="form-input"
                 placeholder="••••••••••••"
@@ -277,8 +383,9 @@ export const ProfilePage = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">New Password</label>
+              <label className="form-label" htmlFor="new-pw">New Password</label>
               <input
+                id="new-pw"
                 type="password"
                 className="form-input"
                 placeholder="••••••••••••"
@@ -306,10 +413,19 @@ export const ProfilePage = () => {
           Current verified address: <strong style={{ color: '#f8fafc' }}>{user?.email}</strong>
         </p>
 
-        <form onSubmit={handleRequestEmailChange} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '14px', alignItems: 'end' }}>
+        <form
+          onSubmit={handleRequestEmailChange}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gap: '14px',
+            alignItems: 'end'
+          }}
+        >
           <div>
-            <label className="form-label">New Email Address</label>
+            <label className="form-label" htmlFor="new-email">New Email Address</label>
             <input
+              id="new-email"
               type="email"
               className="form-input"
               placeholder="new.email@example.com"
@@ -320,8 +436,9 @@ export const ProfilePage = () => {
           </div>
 
           <div>
-            <label className="form-label">Current Password</label>
+            <label className="form-label" htmlFor="email-change-pw">Current Password</label>
             <input
+              id="email-change-pw"
               type="password"
               className="form-input"
               placeholder="••••••••••••"
@@ -331,7 +448,12 @@ export const ProfilePage = () => {
             />
           </div>
 
-          <button type="submit" className="btn btn-primary" disabled={requestingEmailChange} style={{ height: '44px' }}>
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={requestingEmailChange}
+            style={{ height: '44px', width: '100%' }}
+          >
             {requestingEmailChange ? 'Sending...' : 'Request Email Change'}
           </button>
         </form>
@@ -340,7 +462,7 @@ export const ProfilePage = () => {
       {/* Login History Audit Log */}
       <div className="glass-panel" style={{ padding: '24px', marginTop: '24px' }}>
         <h2 style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-          <Clock size={20} color="#818cf8" /> Recent Login History
+          <Clock size={20} color="#818cf8" /> Recent Login History & Audit Trail
         </h2>
 
         {loadingHistory ? (
@@ -352,7 +474,7 @@ export const ProfilePage = () => {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.08)', color: '#94a3b8', textAlign: 'left' }}>
-                  <th style={{ padding: '10px' }}>Timestamp</th>
+                  <th style={{ padding: '10px' }}>When</th>
                   <th style={{ padding: '10px' }}>IP Address</th>
                   <th style={{ padding: '10px' }}>Client Device</th>
                   <th style={{ padding: '10px' }}>Status</th>
@@ -361,8 +483,11 @@ export const ProfilePage = () => {
               <tbody>
                 {history.map((log) => (
                   <tr key={log.id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
-                    <td style={{ padding: '10px', color: '#f8fafc' }}>
-                      {new Date(log.createdAt).toLocaleString()}
+                    <td
+                      style={{ padding: '10px', color: '#f8fafc' }}
+                      title={new Date(log.createdAt).toLocaleString()}
+                    >
+                      {formatRelativeTime(log.createdAt)}
                     </td>
                     <td style={{ padding: '10px', color: '#38bdf8', fontFamily: 'monospace' }}>
                       {log.ipAddress || '127.0.0.1'}
@@ -386,19 +511,22 @@ export const ProfilePage = () => {
       </div>
 
       {/* Danger Zone: Delete Account */}
-      <div className="glass-panel" style={{
-        padding: '24px',
-        marginTop: '24px',
-        borderColor: 'rgba(244, 63, 94, 0.3)',
-        background: 'rgba(244, 63, 94, 0.04)'
-      }}>
+      <div
+        className="glass-panel"
+        style={{
+          padding: '24px',
+          marginTop: '24px',
+          borderColor: 'rgba(244, 63, 94, 0.3)',
+          background: 'rgba(244, 63, 94, 0.04)'
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <h3 style={{ color: '#fb7185', fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
               <AlertTriangle size={18} /> Danger Zone: Delete Account
             </h3>
             <p style={{ color: '#94a3b8', fontSize: '13px' }}>
-              Permanently delete your user account and all associated resources.
+              Permanently delete your user account, OTP history, and all associated resources.
             </p>
           </div>
           <button
@@ -422,20 +550,24 @@ export const ProfilePage = () => {
 
       {/* Delete Account Modal */}
       {deleteModalOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          backdropFilter: 'blur(8px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '20px'
-        }}>
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '20px'
+          }}
+        >
           <div className="glass-panel" style={{ maxWidth: '420px', width: '100%', padding: '24px', textAlign: 'center' }}>
             <AlertTriangle size={36} color="#fb7185" style={{ margin: '0 auto 12px auto' }} />
             <h3 style={{ fontSize: '18px', marginBottom: '8px' }}>Confirm Permanent Deletion</h3>

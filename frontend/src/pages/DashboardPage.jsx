@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Search, Filter, Edit2, Trash2, Tag, Layers, CheckCircle2, FileText, Archive, Clock } from 'lucide-react';
+import { Plus, Search, Filter, Edit2, Trash2, Tag, Layers, CheckCircle2, FileText, Archive, Clock, ArrowUpDown, XCircle } from 'lucide-react';
 import { getItems, createItem, updateItem, deleteItem, getItemStats } from '../api/items';
 import { ItemModal } from '../components/ItemModal';
 import { ConfirmModal } from '../components/ConfirmModal';
@@ -11,10 +11,12 @@ export const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalItems: 0 });
 
-  // Filters & Search
+  // Filters, Search & Sort
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState('DESC');
   const [page, setPage] = useState(1);
 
   // Modals state
@@ -33,8 +35,8 @@ export const DashboardPage = () => {
           q: searchQuery,
           status: statusFilter,
           category: categoryFilter,
-          sortBy: 'createdAt',
-          sortOrder: 'DESC'
+          sortBy,
+          sortOrder
         }),
         getItemStats()
       ]);
@@ -49,7 +51,7 @@ export const DashboardPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, searchQuery, statusFilter, categoryFilter, toast]);
+  }, [page, searchQuery, statusFilter, categoryFilter, sortBy, sortOrder, toast]);
 
   useEffect(() => {
     fetchItems();
@@ -57,11 +59,9 @@ export const DashboardPage = () => {
 
   const handleSaveItem = async (data) => {
     if (itemModal.item) {
-      // Update
       await updateItem(itemModal.item.id, data);
       toast.success('Item resource updated successfully');
     } else {
-      // Create
       await createItem(data);
       toast.success('New item resource created successfully');
     }
@@ -81,6 +81,17 @@ export const DashboardPage = () => {
       setDeleteModal((prev) => ({ ...prev, loading: false }));
     }
   };
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('');
+    setCategoryFilter('');
+    setSortBy('createdAt');
+    setSortOrder('DESC');
+    setPage(1);
+  };
+
+  const hasActiveFilters = searchQuery || statusFilter || categoryFilter;
 
   const getPriorityBadge = (priority) => {
     switch (priority) {
@@ -109,18 +120,20 @@ export const DashboardPage = () => {
   return (
     <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 24px' }}>
       {/* Top Header & Actions */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: '28px',
-        flexWrap: 'wrap',
-        gap: '16px'
-      }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          marginBottom: '28px',
+          flexWrap: 'wrap',
+          gap: '16px'
+        }}
+      >
         <div>
           <h1 style={{ fontSize: '28px', marginBottom: '4px' }}>Resource Management</h1>
           <p style={{ color: '#94a3b8', fontSize: '14px' }}>
-            Production CRUD operations connected directly to your Microsoft SQL Server
+            Production CRUD operations connected directly to your database with live updates
           </p>
         </div>
         <button
@@ -132,12 +145,14 @@ export const DashboardPage = () => {
       </div>
 
       {/* Metrics Banner */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: '16px',
-        marginBottom: '28px'
-      }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '16px',
+          marginBottom: '28px'
+        }}
+      >
         <div className="glass-panel" style={{ padding: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: '#94a3b8', marginBottom: '8px' }}>
             <span style={{ fontSize: '13px', fontWeight: '600' }}>Total Resources</span>
@@ -172,16 +187,19 @@ export const DashboardPage = () => {
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="glass-panel" style={{
-        padding: '16px 20px',
-        marginBottom: '24px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '16px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: '280px' }}>
+      <div
+        className="glass-panel"
+        style={{
+          padding: '16px 20px',
+          marginBottom: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '16px'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: '260px' }}>
           <div style={{ position: 'relative', width: '100%' }}>
             <Search size={18} style={{ position: 'absolute', left: '12px', top: '11px', color: '#64748b' }} />
             <input
@@ -204,11 +222,12 @@ export const DashboardPage = () => {
             <select
               className="form-select"
               value={statusFilter}
+              aria-label="Filter by Status"
               onChange={(e) => {
                 setStatusFilter(e.target.value);
                 setPage(1);
               }}
-              style={{ width: '140px' }}
+              style={{ width: '130px' }}
             >
               <option value="">All Statuses</option>
               <option value="active">Active</option>
@@ -220,11 +239,12 @@ export const DashboardPage = () => {
           <select
             className="form-select"
             value={categoryFilter}
+            aria-label="Filter by Category"
             onChange={(e) => {
               setCategoryFilter(e.target.value);
               setPage(1);
             }}
-            style={{ width: '150px' }}
+            style={{ width: '140px' }}
           >
             <option value="">All Categories</option>
             <option value="general">General</option>
@@ -233,29 +253,107 @@ export const DashboardPage = () => {
             <option value="frontend">Frontend</option>
             <option value="database">Database</option>
           </select>
+
+          {/* Sort Selector */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <ArrowUpDown size={16} color="#64748b" />
+            <select
+              className="form-select"
+              value={`${sortBy}-${sortOrder}`}
+              aria-label="Sort Order"
+              onChange={(e) => {
+                const [sb, so] = e.target.value.split('-');
+                setSortBy(sb);
+                setSortOrder(so);
+                setPage(1);
+              }}
+              style={{ width: '150px' }}
+            >
+              <option value="createdAt-DESC">Newest First</option>
+              <option value="createdAt-ASC">Oldest First</option>
+              <option value="title-ASC">Title (A-Z)</option>
+              <option value="title-DESC">Title (Z-A)</option>
+            </select>
+          </div>
+
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="btn btn-secondary btn-sm"
+              title="Reset all filters"
+            >
+              <XCircle size={14} /> Clear
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Items Grid */}
+      {/* Items Grid with Skeleton Loading */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: '#94a3b8' }}>
-          <div style={{ fontSize: '18px', fontWeight: '600' }}>Loading resources from database...</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '20px' }}>
+          {[1, 2, 3, 4, 5, 6].map((n) => (
+            <div
+              key={n}
+              className="glass-panel"
+              style={{
+                padding: '22px',
+                height: '220px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between'
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '14px' }}>
+                  <div className="skeleton" style={{ width: '80px', height: '18px' }} />
+                  <div className="skeleton" style={{ width: '60px', height: '18px' }} />
+                </div>
+                <div className="skeleton" style={{ width: '70%', height: '22px', marginBottom: '10px' }} />
+                <div className="skeleton" style={{ width: '100%', height: '14px', marginBottom: '6px' }} />
+                <div className="skeleton" style={{ width: '60%', height: '14px' }} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.04)' }}>
+                <div className="skeleton" style={{ width: '90px', height: '16px' }} />
+                <div className="skeleton" style={{ width: '80px', height: '28px' }} />
+              </div>
+            </div>
+          ))}
         </div>
       ) : items.length === 0 ? (
-        <div className="glass-panel" style={{ textAlign: 'center', padding: '60px 20px' }}>
-          <Layers size={48} color="#475569" style={{ margin: '0 auto 16px auto' }} />
-          <h3 style={{ fontSize: '18px', marginBottom: '6px' }}>No Resource Items Found</h3>
-          <p style={{ color: '#94a3b8', fontSize: '14px', maxWidth: '400px', margin: '0 auto 20px auto' }}>
-            {searchQuery || statusFilter || categoryFilter
-              ? 'No items match your active filters. Try adjusting search criteria.'
-              : 'Create your first resource item to manage project components.'}
-          </p>
-          <button
-            className="btn btn-primary"
-            onClick={() => setItemModal({ isOpen: true, item: null })}
+        <div className="glass-panel" style={{ textAlign: 'center', padding: '64px 20px' }}>
+          <div
+            style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: 'rgba(99, 102, 241, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px auto',
+              border: '1px solid rgba(99, 102, 241, 0.2)'
+            }}
           >
-            <Plus size={16} /> Create Resource
-          </button>
+            <Layers size={32} color="#818cf8" />
+          </div>
+          <h3 style={{ fontSize: '19px', marginBottom: '6px', color: '#f8fafc' }}>No Resource Items Found</h3>
+          <p style={{ color: '#94a3b8', fontSize: '14px', maxWidth: '420px', margin: '0 auto 24px auto' }}>
+            {hasActiveFilters
+              ? 'No items matched your current filter criteria. You can clear filters or refine your search.'
+              : 'Your workspace has no resources yet. Create your first item to begin tracking project assets.'}
+          </p>
+          {hasActiveFilters ? (
+            <button className="btn btn-secondary" onClick={clearFilters}>
+              Clear Active Filters
+            </button>
+          ) : (
+            <button
+              className="btn btn-primary"
+              onClick={() => setItemModal({ isOpen: true, item: null })}
+            >
+              <Plus size={16} /> Create Your First Resource
+            </button>
+          )}
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '20px' }}>
@@ -313,15 +411,17 @@ export const DashboardPage = () => {
                 )}
               </div>
 
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                paddingTop: '16px',
-                borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-                fontSize: '12px',
-                color: '#64748b'
-              }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  paddingTop: '16px',
+                  borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                  fontSize: '12px',
+                  color: '#64748b'
+                }}
+              >
                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <Clock size={13} /> {new Date(item.createdAt).toLocaleDateString()}
                 </span>
@@ -350,13 +450,15 @@ export const DashboardPage = () => {
 
       {/* Pagination Controls */}
       {pagination.totalPages > 1 && (
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '12px',
-          marginTop: '32px'
-        }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '12px',
+            marginTop: '32px'
+          }}
+        >
           <button
             className="btn btn-secondary btn-sm"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
